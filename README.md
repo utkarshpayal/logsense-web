@@ -3,6 +3,7 @@
 LogSense is an AI-powered developer observability platform that turns raw logs and metrics into meaningful system insights. This repository contains the Next.js frontend dashboard—a clean, premium, and fully responsive user interface for monitoring log traffic, tracking system performance, managing projects/API keys, and querying your logs in plain English using conversational AI.
 
 ---
+<img width="1919" height="970" alt="image" src="https://github.com/user-attachments/assets/7f2e5006-e2a6-41d2-b3be-d8958511ea67" />
 
 ## 🏗️ Architecture Overview
 
