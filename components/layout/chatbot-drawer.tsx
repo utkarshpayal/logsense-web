@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatbotDrawerProps {
   isOpen: boolean;
@@ -200,8 +202,23 @@ export default function ChatbotDrawer({ isOpen, onClose }: ChatbotDrawerProps) {
                       </div>
                     </div>
                   ) : (
-                    <div className="text-slate-250 leading-relaxed break-words whitespace-pre-wrap font-sans text-xs">
-                      {chatResponse.text}
+                    <div className="text-slate-250 leading-relaxed break-words text-xs">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          strong: ({ node, ...props }) => <span className="font-bold text-white" {...props} />,
+                          p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-2 space-y-1" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-2 space-y-1" {...props} />,
+                          li: ({ node, ...props }) => <li className="text-slate-300" {...props} />,
+                          code: ({ node, inline, ...props }: any) => 
+                            inline 
+                              ? <code className="bg-slate-900 text-cyan-400 px-1 py-0.5 rounded font-mono text-[10px]" {...props} />
+                              : <code className="block bg-slate-900 p-2 rounded text-[10px] font-mono whitespace-pre-wrap overflow-x-auto" {...props} />,
+                        }}
+                      >
+                        {chatResponse.text}
+                      </ReactMarkdown>
                     </div>
                   )}
 
