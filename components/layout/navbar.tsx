@@ -10,14 +10,16 @@ import {
   Plus,
   Check,
   ChevronRight,
+  Bot,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 
 interface NavbarProps {
   onMenuClick?: () => void;
+  onChatClick?: () => void;
 }
 
-export default function Navbar({ onMenuClick }: NavbarProps) {
+export default function Navbar({ onMenuClick, onChatClick }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { projects, selectedProjectId, setSelectedProjectId } = useProjectStore();
@@ -52,49 +54,61 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-zinc-800/80 bg-zinc-950/80 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-800/80 bg-[#060913]/85 px-4 backdrop-blur-md sm:px-6 lg:px-8 font-mono">
       <div className="flex items-center gap-4">
         {/* Mobile menu trigger */}
         <button
           type="button"
           onClick={onMenuClick}
-          className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-white md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-850 bg-slate-900/40 text-slate-450 hover:text-white md:hidden transition-colors cursor-pointer"
         >
-          <Menu className="h-6 w-6" />
+          <Menu className="h-5 w-5" />
         </button>
 
         {/* Separator line on mobile */}
-        <div className="h-5 w-px bg-zinc-800 md:hidden" />
+        <div className="h-5 w-px bg-slate-800 md:hidden" />
 
         {/* Current page title breadcrumb */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-500 font-semibold tracking-wider uppercase hidden sm:inline-block">
+          <span className="text-[10px] text-slate-500 font-extrabold tracking-widest uppercase hidden sm:inline-block">
             Dashboard
           </span>
-          <ChevronRight className="h-4 w-4 text-zinc-600 hidden sm:inline-block" />
-          <h1 className="text-base font-semibold text-zinc-100">{getPageTitle()}</h1>
+          <ChevronRight className="h-4 w-4 text-slate-655 hidden sm:inline-block" />
+          <h1 className="text-xs font-bold text-white tracking-widest uppercase">{getPageTitle()}</h1>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        {/* Chatbot toggle button */}
+        {selectedProjectId && (
+          <button
+            onClick={onChatClick}
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800/80 bg-slate-950/40 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all cursor-pointer relative"
+            title="Toggle AI Observability Drawer"
+          >
+            <Bot className="h-4.5 w-4.5" />
+            <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-cyan-455" />
+          </button>
+        )}
+
         {/* Project Switcher Selector */}
         {projects.length > 0 && (
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white hover:border-zinc-700 transition-all text-sm font-medium focus:outline-none"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-800/80 bg-slate-950/40 text-slate-350 hover:text-white hover:border-cyan-500/30 transition-all text-xs font-bold uppercase tracking-widest focus:outline-none cursor-pointer"
             >
-              <Folder className="h-4 w-4 text-indigo-400" />
+              <Folder className="h-4 w-4 text-cyan-400" />
               <span className="max-w-[120px] truncate">
                 {selectedProject ? selectedProject.name : "Select Project"}
               </span>
-              <ChevronDown className="h-3.5 w-3.5 text-zinc-500" />
+              <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg border border-zinc-800 bg-zinc-900 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none z-30 p-1.5 divide-y divide-zinc-800">
+              <div className="absolute right-0 mt-2.5 w-56 origin-top-right rounded-xl border border-slate-800 bg-[#0b0e1a]/95 backdrop-blur-xl shadow-2xl p-1.5 divide-y divide-slate-800/50 scale-in">
                 <div className="py-1">
-                  <span className="block px-3 py-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  <span className="block px-3 py-1.5 text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
                     Scope Project
                   </span>
                   {projects.map((project) => {
@@ -105,20 +119,19 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                         onClick={() => {
                           setSelectedProjectId(project.id);
                           setDropdownOpen(false);
-                          // Option: redirect to dashboard if switching projects to update data context
                           if (pathname === "/dashboard" || pathname === "/logs" || pathname === "/api-keys") {
                             router.refresh();
                           }
                         }}
                         className={cn(
-                          "flex w-full items-center justify-between px-3 py-2 text-sm rounded-md transition-colors text-left",
+                          "flex w-full items-center justify-between px-3 py-2 text-xs rounded-lg transition-colors text-left font-bold uppercase tracking-wider cursor-pointer",
                           isSelected
-                            ? "bg-indigo-600/10 text-indigo-400 font-medium"
-                            : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60"
+                            ? "bg-cyan-500/5 text-cyan-400 border border-cyan-500/20"
+                            : "text-slate-400 hover:text-white hover:bg-slate-900/30"
                         )}
                       >
                         <span className="truncate">{project.name}</span>
-                        {isSelected && <Check className="h-4 w-4 text-indigo-400" />}
+                        {isSelected && <Check className="h-3.5 w-3.5 text-cyan-400" />}
                       </button>
                     );
                   })}
@@ -129,9 +142,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                       setDropdownOpen(false);
                       router.push("/projects");
                     }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg text-slate-400 hover:text-white hover:bg-slate-900/30 cursor-pointer"
                   >
-                    <Plus className="h-4 w-4 text-zinc-400" />
+                    <Plus className="h-4 w-4 text-slate-500" />
                     Manage Projects
                   </button>
                 </div>
@@ -144,7 +157,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         {projects.length === 0 && (
           <button
             onClick={() => router.push("/projects")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-955 text-xs font-bold uppercase tracking-widest transition-all shadow-md cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
             New Project

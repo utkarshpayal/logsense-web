@@ -8,7 +8,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { useAuthStore } from "../../../store/auth.store";
 import { authApi } from "../../../lib/api";
-import { Activity, Mail, Lock, User, Loader2, ArrowRight } from "lucide-react";
+import { Cpu, Mail, Lock, User, Loader2, ArrowRight } from "lucide-react";
 
 // Form validation schemas
 const loginSchema = z.object({
@@ -98,70 +98,69 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="glass-panel p-8 sm:p-10 rounded-2xl border border-zinc-800 shadow-2xl glow-indigo relative overflow-hidden">
+    <div className="cyber-panel p-8 sm:p-10 rounded-2xl border border-slate-800 shadow-2xl relative overflow-hidden group font-mono">
+      {/* Glow corner accent */}
+      <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-cyan-500/5 blur-[50px] pointer-events-none" />
+
       {/* Header */}
-      <div className="flex flex-col items-center mb-8">
-        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 shadow-lg shadow-indigo-600/30 mb-4 animate-bounce" style={{ animationDuration: '3s' }}>
-          <Activity className="w-6 h-6 text-white" />
+      <div className="flex flex-col items-center mb-8 relative z-10">
+        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-650 shadow-lg shadow-cyan-500/20 mb-4 animate-spin" style={{ animationDuration: "12s" }}>
+          <Cpu className="w-6 h-6 text-slate-900" />
         </div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">
-          {isLoginView ? "Welcome back" : "Create your account"}
+        <h2 className="text-sm font-extrabold text-white tracking-widest uppercase">
+          {isLoginView ? "SYSTEM ACCESS" : "GENERATE CLIENT CREDENTIALS"}
         </h2>
-        <p className="text-sm text-zinc-400 mt-1">
+        <p className="text-xs text-slate-500 mt-2 uppercase tracking-widest leading-relaxed text-center">
           {isLoginView
-            ? "Sign in to monitor and query your logs"
-            : "Get started with AI-powered observability"}
+            ? "Provide authorization keys to access dashboard telemetry"
+            : "Register new developer credentials on LogSense stack"}
         </p>
       </div>
 
       {/* Form Content */}
       {isLoginView ? (
-        <form onSubmit={handleLoginSubmit(onLoginSubmit)} className="space-y-5">
+        <form onSubmit={handleLoginSubmit(onLoginSubmit)} className="space-y-5 relative z-10 text-xs">
           {/* Email */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Email Address
+          <div className="space-y-1.5">
+            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+              Email Endpoint
             </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
-                <Mail className="h-4.5 w-4.5" />
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-slate-650">
+                <Mail className="h-3.5 w-3.5" />
               </span>
               <input
                 type="email"
                 placeholder="developer@logsense.com"
-                className="block w-full pl-10 pr-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                 {...registerLogin("email")}
                 disabled={isSubmitting}
               />
             </div>
             {loginErrors.email && (
-              <p className="text-xs text-red-500 mt-1.5 font-medium">{loginErrors.email.message}</p>
+              <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{loginErrors.email.message}</p>
             )}
           </div>
 
           {/* Password */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Password
-              </label>
-            </div>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
-                <Lock className="h-4.5 w-4.5" />
+          <div className="space-y-1.5">
+            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+              Security Key
+            </label>
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-slate-655">
+                <Lock className="h-3.5 w-3.5" />
               </span>
               <input
                 type="password"
                 placeholder="••••••••"
-                className="block w-full pl-10 pr-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                 {...registerLogin("password")}
                 disabled={isSubmitting}
               />
             </div>
             {loginErrors.password && (
-              <p className="text-xs text-red-500 mt-1.5 font-medium">
-                {loginErrors.password.message}
-              </p>
+              <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{loginErrors.password.message}</p>
             )}
           </div>
 
@@ -169,87 +168,83 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all shadow-lg hover:shadow-indigo-600/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="w-full flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-900 font-bold uppercase tracking-widest text-xs transition-all shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
           >
             {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin text-white" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <>
-                Sign In
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                <span>Establish Session</span>
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </>
             )}
           </button>
         </form>
       ) : (
-        <form onSubmit={handleRegisterSubmit(onRegisterSubmit)} className="space-y-5">
+        <form onSubmit={handleRegisterSubmit(onRegisterSubmit)} className="space-y-5 relative z-10 text-xs">
           {/* Full Name */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Full Name
+          <div className="space-y-1.5">
+            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+              Operator Identifier
             </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
-                <User className="h-4.5 w-4.5" />
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-slate-655">
+                <User className="h-3.5 w-3.5" />
               </span>
               <input
                 type="text"
                 placeholder="Alex Mercer"
-                className="block w-full pl-10 pr-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                 {...registerRegister("name")}
                 disabled={isSubmitting}
               />
             </div>
             {registerErrors.name && (
-              <p className="text-xs text-red-500 mt-1.5 font-medium">{registerErrors.name.message}</p>
+              <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{registerErrors.name.message}</p>
             )}
           </div>
 
           {/* Email */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+          <div className="space-y-1.5">
+            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
               Email Address
             </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
-                <Mail className="h-4.5 w-4.5" />
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-slate-655">
+                <Mail className="h-3.5 w-3.5" />
               </span>
               <input
                 type="email"
                 placeholder="developer@logsense.com"
-                className="block w-full pl-10 pr-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                 {...registerRegister("email")}
                 disabled={isSubmitting}
               />
             </div>
             {registerErrors.email && (
-              <p className="text-xs text-red-500 mt-1.5 font-medium">
-                {registerErrors.email.message}
-              </p>
+              <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{registerErrors.email.message}</p>
             )}
           </div>
 
           {/* Password */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Password
+          <div className="space-y-1.5">
+            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+              Security Key
             </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
-                <Lock className="h-4.5 w-4.5" />
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-slate-655">
+                <Lock className="h-3.5 w-3.5" />
               </span>
               <input
                 type="password"
                 placeholder="At least 8 characters"
-                className="block w-full pl-10 pr-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                 {...registerRegister("password")}
                 disabled={isSubmitting}
               />
             </div>
             {registerErrors.password && (
-              <p className="text-xs text-red-500 mt-1.5 font-medium">
-                {registerErrors.password.message}
-              </p>
+              <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{registerErrors.password.message}</p>
             )}
           </div>
 
@@ -257,14 +252,14 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all shadow-lg hover:shadow-indigo-600/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="w-full flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-900 font-bold uppercase tracking-widest text-xs transition-all shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
           >
             {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin text-white" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <>
-                Create Account
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                <span>Generate Profile</span>
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </>
             )}
           </button>
@@ -272,19 +267,19 @@ export default function LoginPage() {
       )}
 
       {/* Switch link */}
-      <div className="mt-6 text-center">
+      <div className="mt-6 text-center relative z-10">
         <button
           onClick={toggleView}
           disabled={isSubmitting}
-          className="text-xs font-medium text-zinc-450 hover:text-indigo-400 transition-colors focus:outline-none"
+          className="text-xs font-bold text-slate-500 hover:text-cyan-400 uppercase tracking-widest transition-colors focus:outline-none cursor-pointer"
         >
           {isLoginView ? (
             <>
-              Don't have an account? <span className="text-indigo-500 font-semibold">Sign up</span>
+              Register client? <span className="text-cyan-400 hover:underline">Execute creation</span>
             </>
           ) : (
             <>
-              Already have an account? <span className="text-indigo-500 font-semibold">Sign in</span>
+              Already registered? <span className="text-cyan-400 hover:underline">Verify Identity</span>
             </>
           )}
         </button>

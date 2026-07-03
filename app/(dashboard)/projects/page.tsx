@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectApi } from "../../../lib/api";
-import { useProjectStore, Project } from "../../../store/project.store";
+import { useProjectStore } from "../../../store/project.store";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
-  FolderGit2,
+  Cpu,
   Plus,
   Trash2,
   ExternalLink,
@@ -19,11 +19,11 @@ import {
   Layers,
   ArrowRight,
   Info,
+  X,
 } from "lucide-react";
 import { cn } from "../../../utils/cn";
 import ConfirmModal from "../../../components/ConfirmModal";
 
-// Form validation schema
 const projectSchema = z.object({
   name: z
     .string()
@@ -52,7 +52,6 @@ export default function ProjectsPage() {
     resolver: zodResolver(projectSchema),
   });
 
-  // Query projects again for freshness
   const { data: projectsData, isLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: projectApi.getProjects,
@@ -63,7 +62,6 @@ export default function ProjectsPage() {
     onSuccess: (response) => {
       if (response.success && response.data) {
         queryClient.invalidateQueries({ queryKey: ["projects"] });
-        // Select the newly created project
         setSelectedProjectId(response.data.id);
         toast.success(`Project "${response.data.name}" created!`);
         reset();
@@ -81,7 +79,6 @@ export default function ProjectsPage() {
     mutationFn: projectApi.deleteProject,
     onSuccess: (_, projectId) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      // If we deleted the active project, deselect it
       if (selectedProjectId === projectId) {
         setSelectedProjectId(null);
       }
@@ -107,49 +104,50 @@ export default function ProjectsPage() {
 
   const selectProject = (id: string) => {
     setSelectedProjectId(id);
-    toast.success("Active project scope switched");
+    toast.success("Scope changed successfully");
     router.push("/dashboard");
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight sm:text-2xl">Workspaces</h2>
-          <p className="text-sm text-zinc-400 mt-1">
-            Create and manage application projects to scope your observability logs.
+          <h2 className="text-base font-extrabold text-white tracking-widest uppercase">Workspace Nodes</h2>
+          <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider">
+            Register and partition system scopes for your applications.
           </p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all shadow-md shadow-indigo-600/10 hover:scale-[1.01] active:scale-[0.99]"
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-900 text-xs font-bold uppercase tracking-widest transition-all shadow-md cursor-pointer"
         >
           <Plus className="h-4 w-4" />
-          Create Project
+          Add Node
         </button>
       </div>
 
       {/* Projects Grid */}
       {isLoading ? (
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
         </div>
       ) : projects.length === 0 ? (
-        <div className="glass-panel rounded-xl border border-zinc-800 p-12 text-center max-w-xl mx-auto mt-8 glow-indigo">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-450 mx-auto mb-5">
-            <FolderGit2 className="h-6 w-6 text-zinc-450" />
+        <div className="cyber-panel rounded-2xl border border-slate-800 p-12 text-center max-w-xl mx-auto mt-8 relative overflow-hidden">
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/5 border border-cyan-500/20 text-cyan-400 mx-auto mb-5">
+            <Cpu className="h-6 w-6 animate-pulse" />
           </div>
-          <h3 className="text-lg font-semibold text-zinc-200">No projects found</h3>
-          <p className="text-sm text-zinc-400 mt-2 max-w-sm mx-auto">
-            Get started by creating your first project. A project groups your API keys, environments, and logs.
+          <h3 className="text-xs font-bold text-white uppercase tracking-widest">No nodes registered</h3>
+          <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed uppercase tracking-wider">
+            A node acts as an isolated project grouping your SDK tokens and Clickhouse event tables.
           </p>
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all mx-auto mt-6"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-805 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all mx-auto mt-6 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
-            Create First Project
+            Initialize First Node
           </button>
         </div>
       ) : (
@@ -161,21 +159,21 @@ export default function ProjectsPage() {
                 key={project.id}
                 onClick={() => selectProject(project.id)}
                 className={cn(
-                  "glass-card p-6 rounded-xl border flex flex-col justify-between cursor-pointer group relative overflow-hidden",
+                  "cyber-card p-6 rounded-2xl border flex flex-col justify-between cursor-pointer group relative overflow-hidden",
                   isActive
-                    ? "border-indigo-500 bg-indigo-900/5 shadow-md shadow-indigo-950/20"
-                    : "border-zinc-800"
+                    ? "border-cyan-500/40 bg-cyan-950/5 shadow-[0_0_15px_-4px_rgba(6,182,212,0.25)]"
+                    : "border-slate-800"
                 )}
               >
                 {/* Active indicator */}
                 {isActive && (
-                  <div className="absolute top-0 right-0 h-2 w-16 bg-indigo-500 rounded-bl-lg" />
+                  <div className="absolute top-0 right-0 h-1.5 w-16 bg-gradient-to-r from-cyan-400 to-indigo-600 rounded-bl-lg" />
                 )}
 
                 <div>
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:text-indigo-400 group-hover:border-indigo-500/30 transition-all">
-                      <Layers className="h-5 w-5" />
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 group-hover:text-cyan-400 group-hover:border-cyan-500/20 transition-all">
+                      <Layers className="h-4.5 w-4.5" />
                     </div>
                     <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
@@ -183,19 +181,19 @@ export default function ProjectsPage() {
                           e.stopPropagation();
                           router.push(`/projects/${project.id}`);
                         }}
-                        className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-white"
-                        title="Project Details"
+                        className="p-1.5 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 text-slate-500 hover:text-white transition-colors"
+                        title="Configuration details"
                       >
                         <ExternalLink className="h-4 w-4" />
                       </button>
                       <button
                         onClick={(e) => handleDelete(e, project.id, project.name)}
-                        className="p-1.5 rounded-md hover:bg-red-500/10 text-zinc-450 hover:text-red-400"
-                        title="Delete Project"
+                        className="p-1.5 rounded-lg hover:bg-rose-500/10 border border-transparent hover:border-rose-500/25 text-slate-550 hover:text-rose-400 transition-colors"
+                        title="Delete Workspace"
                         disabled={isDeleting === project.id}
                       >
                         {isDeleting === project.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-red-400" />
+                          <Loader2 className="h-4 w-4 animate-spin text-rose-400" />
                         ) : (
                           <Trash2 className="h-4 w-4" />
                         )}
@@ -203,23 +201,23 @@ export default function ProjectsPage() {
                     </div>
                   </div>
 
-                  <h4 className="text-base font-semibold text-zinc-100 group-hover:text-white transition-colors truncate">
+                  <h4 className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors truncate uppercase tracking-widest">
                     {project.name}
                   </h4>
-                  <p className="text-xs text-zinc-450 mt-1.5 line-clamp-2 h-8 min-h-[32px]">
+                  <p className="text-xs text-slate-500 mt-2 line-clamp-2 h-8 min-h-[32px] leading-relaxed font-sans normal-case">
                     {project.description || "No description provided."}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-zinc-850 pt-4 mt-6">
-                  <span className="flex items-center gap-1.5 text-[11px] text-zinc-550">
+                <div className="flex items-center justify-between border-t border-slate-900 pt-4 mt-6">
+                  <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
                     <Calendar className="h-3.5 w-3.5" />
                     {new Date(project.created_at).toLocaleDateString()}
                   </span>
 
-                  <span className="flex items-center gap-1 text-[11px] font-semibold text-indigo-400 group-hover:translate-x-0.5 transition-transform">
-                    Enter Workspace
-                    <ArrowRight className="h-3 w-3" />
+                  <span className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-cyan-400 group-hover:translate-x-1 transition-transform">
+                    Scope
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </span>
                 </div>
               </div>
@@ -230,72 +228,83 @@ export default function ProjectsPage() {
 
       {/* Create Project Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="glass-panel w-full max-w-md rounded-xl border border-zinc-800 p-6 shadow-2xl animate-fade-in relative z-50">
-            <h3 className="text-lg font-bold text-white mb-2">Create New Project</h3>
-            <p className="text-xs text-zinc-450 mb-6">
-              Name your project workspace. This name must be unique.
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm scale-in">
+          <div className="cyber-panel w-full max-w-md rounded-2xl border border-slate-800 p-6 shadow-2xl relative z-50">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-xs font-bold text-white uppercase tracking-widest">Register Node</h3>
+              <button
+                onClick={() => {
+                  reset();
+                  setModalOpen(false);
+                }}
+                className="p-1 rounded-lg hover:bg-slate-900 text-slate-500 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed uppercase tracking-wider">
+              Define the workspace nodes to begin ingesting telemetry.
             </p>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                  Project Name
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 text-xs">
+              <div className="space-y-1.5">
+                <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+                  Node Title
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. My E-commerce API"
-                  className="block w-full px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  placeholder="e.g. Authentitas Service"
+                  className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-202 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                   {...register("name")}
                   disabled={createMutation.isPending}
                 />
                 {errors.name && (
-                  <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.name.message}</p>
+                  <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{errors.name.message}</p>
                 )}
               </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                  Description <span className="text-zinc-650">(Optional)</span>
+              <div className="space-y-1.5">
+                <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+                  Description <span className="text-slate-655">(Optional)</span>
                 </label>
                 <textarea
-                  placeholder="Summarize this app's purpose..."
+                  placeholder="Workspace description / context..."
                   rows={3}
-                  className="block w-full px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none"
+                  className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-202 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all resize-none font-mono"
                   {...register("description")}
                   disabled={createMutation.isPending}
                 />
                 {errors.description && (
-                  <p className="text-xs text-red-500 mt-1.5 font-medium">
+                  <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">
                     {errors.description.message}
                   </p>
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-900">
                 <button
                   type="button"
                   onClick={() => {
                     reset();
                     setModalOpen(false);
                   }}
-                  className="px-4 py-2 rounded-lg border border-zinc-800 hover:bg-zinc-900 text-zinc-400 hover:text-white text-xs font-semibold transition-colors"
+                  className="px-4 py-2.5 rounded-xl border border-slate-850 hover:bg-slate-950 text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer"
                   disabled={createMutation.isPending}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors shadow-lg"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-955 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
                   disabled={createMutation.isPending}
                 >
                   {createMutation.isPending ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Creating...
+                      <span>Processing...</span>
                     </>
                   ) : (
-                    "Create"
+                    "Register"
                   )}
                 </button>
               </div>
@@ -314,9 +323,9 @@ export default function ProjectsPage() {
             deleteMutation.mutate(projectToDelete.id);
           }
         }}
-        title="Delete Project"
-        message={`Are you sure you want to delete "${projectToDelete?.name}"? This deletes all associated API keys and logs permanently.`}
-        confirmText="Delete Project"
+        title="Delete Node"
+        message={`Confirm node deletion for "${projectToDelete?.name}". All keys and telemetry records mapped to this node will be purged.`}
+        confirmText="Confirm Delete"
         type="danger"
         isLoading={deleteMutation.isPending}
       />

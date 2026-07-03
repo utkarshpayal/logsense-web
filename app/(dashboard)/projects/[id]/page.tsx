@@ -15,13 +15,12 @@ import {
   Code,
   Copy,
   Check,
-  Folder,
+  Cpu,
   ArrowLeft,
   BookOpen,
 } from "lucide-react";
 import { cn } from "../../../../utils/cn";
 
-// Form validation schema for project updates
 const updateProjectSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters").max(100).trim(),
   description: z.string().max(500).optional(),
@@ -39,7 +38,6 @@ export default function ProjectDetailPage() {
   const [sdkLang, setSdkLang] = useState<"node" | "python" | "curl">("node");
   const [copiedText, setCopiedText] = useState(false);
 
-  // Fetch project details
   const { data: projectResponse, isLoading, error } = useQuery({
     queryKey: ["project", projectId],
     queryFn: () => projectApi.getProject(projectId),
@@ -48,7 +46,6 @@ export default function ProjectDetailPage() {
 
   const project = projectResponse?.data;
 
-  // Form for updates
   const {
     register,
     handleSubmit,
@@ -59,7 +56,6 @@ export default function ProjectDetailPage() {
     values: project ? { name: project.name, description: project.description || "" } : undefined,
   });
 
-  // Mutator for updating project details
   const updateMutation = useMutation({
     mutationFn: (values: UpdateFormValues) => projectApi.updateProject(projectId, values),
     onSuccess: (response) => {
@@ -109,7 +105,7 @@ app.get('/api/users', (req, res) => {
   res.json([{ id: 1, name: 'Alice' }]);
 });
 
-app.listen(3000);`;
+app.listen(3050);`;
   };
 
   const getPythonCode = () => {
@@ -162,21 +158,21 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
       </div>
     );
   }
 
   if (error || !project) {
     return (
-      <div className="glass-panel p-8 text-center rounded-xl border border-zinc-800">
-        <h3 className="text-lg font-bold text-white">Workspace not found</h3>
-        <p className="text-zinc-400 text-sm mt-2">
-          The project workspace you are trying to view does not exist or you lack permission.
+      <div className="cyber-panel p-8 text-center rounded-2xl border border-slate-800 max-w-xl mx-auto font-mono">
+        <h3 className="text-xs font-bold text-white uppercase tracking-widest">Workspace Not Found</h3>
+        <p className="text-slate-500 text-[10px] mt-2 uppercase tracking-wider">
+          The node index requested does not exist or you lack read privileges.
         </p>
         <button
           onClick={() => router.push("/projects")}
-          className="mt-4 px-4 py-2 bg-indigo-650 hover:bg-indigo-600 rounded-lg text-white font-semibold text-xs"
+          className="mt-6 px-4 py-2.5 bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer"
         >
           Back to Workspaces
         </button>
@@ -185,52 +181,52 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Breadcrumb back */}
       <button
         onClick={() => router.push("/projects")}
-        className="flex items-center gap-1.5 text-xs font-semibold text-zinc-550 hover:text-zinc-300 transition-colors"
+        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-350 transition-colors cursor-pointer"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Workspaces
+        Back to Node List
       </button>
 
       {/* Workspace Header Summary */}
-      <div className="flex items-center gap-4 bg-zinc-900/30 p-6 rounded-xl border border-zinc-850">
-        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600/10 border border-indigo-500/25 text-indigo-400">
-          <Folder className="h-6 w-6" />
+      <div className="flex items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800/80">
+        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/5 border border-cyan-500/25 text-cyan-450">
+          <Cpu className="h-5 w-5 animate-pulse" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-white">{project.name}</h2>
-          <p className="text-xs text-zinc-450 mt-1">UUID: {project.id}</p>
+          <h2 className="text-xs font-extrabold text-white tracking-widest uppercase">{project.name}</h2>
+          <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest">UUID // {project.id}</p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-zinc-850">
+      {/* Tabs Selector */}
+      <div className="flex border-b border-slate-900">
         <button
           onClick={() => setActiveTab("integration")}
           className={cn(
-            "flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-all border-b-2",
+            "flex items-center gap-2 px-5 py-3 text-[10px] font-bold uppercase tracking-widest transition-all border-b-2 cursor-pointer",
             activeTab === "integration"
-              ? "border-indigo-500 text-indigo-400"
-              : "border-transparent text-zinc-450 hover:text-zinc-300"
+              ? "border-cyan-500 text-cyan-400"
+              : "border-transparent text-slate-500 hover:text-slate-300"
           )}
         >
           <Code className="h-4.5 w-4.5" />
-          SDK Integration Guide
+          Integration
         </button>
         <button
           onClick={() => setActiveTab("settings")}
           className={cn(
-            "flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-all border-b-2",
+            "flex items-center gap-2 px-5 py-3 text-[10px] font-bold uppercase tracking-widest transition-all border-b-2 cursor-pointer",
             activeTab === "settings"
-              ? "border-indigo-500 text-indigo-400"
-              : "border-transparent text-zinc-450 hover:text-zinc-300"
+              ? "border-cyan-500 text-cyan-400"
+              : "border-transparent text-slate-500 hover:text-slate-300"
           )}
         >
           <Settings className="h-4.5 w-4.5" />
-          Workspace Settings
+          Settings
         </button>
       </div>
 
@@ -238,69 +234,55 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
       {activeTab === "integration" ? (
         <div className="space-y-6">
           <div className="flex flex-col gap-2">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <BookOpen className="h-4.5 w-4.5 text-indigo-400" />
-              Auto-Instrumentation SDK Setup
+            <h3 className="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-widest">
+              <BookOpen className="h-4.5 w-4.5 text-cyan-400" />
+              SDK AUTO-INSTRUMENTATION SETUP
             </h3>
-            <p className="text-xs text-zinc-450 leading-relaxed max-w-2xl">
-              Integrate LogSense into your backend service. It will automatically capture all incoming requests, response statuses, query latencies, and errors, sending them asynchronously to our secure collectors.
+            <p className="text-[10px] text-slate-500 leading-relaxed max-w-2xl font-sans normal-case">
+              Integrate LogSense into your service container. The SDK will automatically trace execution times, query latency thresholds, and HTTP statuses, broadcasting telemetry asynchronously.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 p-1 bg-zinc-900 border border-zinc-800 rounded-lg w-fit">
-            <button
-              onClick={() => setSdkLang("node")}
-              className={cn(
-                "px-3.5 py-1.5 rounded text-xs font-semibold transition-colors",
-                sdkLang === "node"
-                  ? "bg-indigo-600 text-white"
-                  : "text-zinc-450 hover:text-zinc-200"
-              )}
-            >
-              Node.js / Express
-            </button>
-            <button
-              onClick={() => setSdkLang("python")}
-              className={cn(
-                "px-3.5 py-1.5 rounded text-xs font-semibold transition-colors",
-                sdkLang === "python"
-                  ? "bg-indigo-600 text-white"
-                  : "text-zinc-450 hover:text-zinc-200"
-              )}
-            >
-              Python / FastAPI
-            </button>
-            <button
-              onClick={() => setSdkLang("curl")}
-              className={cn(
-                "px-3.5 py-1.5 rounded text-xs font-semibold transition-colors",
-                sdkLang === "curl"
-                  ? "bg-indigo-600 text-white"
-                  : "text-zinc-450 hover:text-zinc-200"
-              )}
-            >
-              cURL / Raw API
-            </button>
+          {/* Sub-selector tabs */}
+          <div className="flex items-center gap-2 p-1.5 bg-slate-955 border border-slate-800 rounded-xl w-fit">
+            {[
+              { id: "node", label: "NODEJS SDK" },
+              { id: "python", label: "FASTAPI SDK" },
+              { id: "curl", label: "CURL API" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSdkLang(tab.id as any)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors cursor-pointer",
+                  sdkLang === tab.id
+                    ? "bg-cyan-500 text-slate-950"
+                    : "text-slate-500 hover:text-slate-200"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
-          {/* Code display block */}
-          <div className="relative rounded-xl border border-zinc-800 bg-zinc-950/70 overflow-hidden group">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-850 bg-zinc-900/40 text-xs text-zinc-450">
+          {/* Code displays */}
+          <div className="relative rounded-2xl border border-slate-800 bg-slate-950/70 overflow-hidden group">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-900 bg-slate-950/40 text-[10px] text-slate-500 font-mono">
               <span className="flex items-center gap-1.5">
-                <Terminal className="h-3.5 w-3.5 text-zinc-500" />
-                {sdkLang === "node" && "app.js"}
+                <Terminal className="h-3.5 w-3.5 text-slate-655" />
+                {sdkLang === "node" && "package.json // app.js"}
                 {sdkLang === "python" && "main.py"}
                 {sdkLang === "curl" && "ingest.sh"}
               </span>
               <button
                 onClick={() => handleCopy(getCodeSnippet())}
-                className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors"
+                className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
-                {copiedText ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
-                Copy
+                {copiedText ? <Check className="h-3.5 w-3.5 text-emerald-450" /> : <Copy className="h-3.5 w-3.5" />}
+                Copy Code
               </button>
             </div>
-            <pre className="p-5 overflow-x-auto font-mono text-xs text-zinc-350 leading-relaxed">
+            <pre className="p-5 overflow-x-auto font-mono text-[10px] text-slate-350 leading-relaxed whitespace-pre select-text">
               <code>{getCodeSnippet()}</code>
             </pre>
           </div>
@@ -308,40 +290,40 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
       ) : (
         <div className="max-w-xl space-y-6">
           <div className="flex flex-col gap-1.5">
-            <h3 className="text-base font-bold text-white">Modify Details</h3>
-            <p className="text-xs text-zinc-450">
-              Change the friendly name and description of this project workspace.
+            <h3 className="text-xs font-bold text-white uppercase tracking-widest">Update Node Properties</h3>
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider">
+              Modify display metadata and logging attributes for this node.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                Project Name
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 text-[10px]">
+            <div className="space-y-1.5">
+              <label className="block font-bold text-slate-400 uppercase tracking-widest">
+                Node Name
               </label>
               <input
                 type="text"
-                className="block w-full px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                 {...register("name")}
                 disabled={updateMutation.isPending}
               />
               {errors.name && (
-                <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.name.message}</p>
+                <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{errors.name.message}</p>
               )}
             </div>
 
-            <div>
-              <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+            <div className="space-y-1.5">
+              <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
                 Description
               </label>
               <textarea
                 rows={4}
-                className="block w-full px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none"
+                className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all resize-none font-mono"
                 {...register("description")}
                 disabled={updateMutation.isPending}
               />
               {errors.description && (
-                <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.description.message}</p>
+                <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{errors.description.message}</p>
               )}
             </div>
 
@@ -349,10 +331,10 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
               <button
                 type="submit"
                 disabled={!isDirty || updateMutation.isPending}
-                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-650 hover:bg-indigo-600 disabled:bg-zinc-850 text-white disabled:text-zinc-500 text-xs font-semibold transition-all shadow-md"
+                className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-955 border border-slate-800 hover:border-cyan-500/30 disabled:border-slate-900 disabled:text-slate-600 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
               >
                 {updateMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                Save Changes
+                Save Settings
               </button>
             </div>
           </form>

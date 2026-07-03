@@ -21,6 +21,7 @@ import {
   FolderOpen,
   Info,
   BadgeAlert,
+  X,
 } from "lucide-react";
 import { cn } from "../../../utils/cn";
 import ConfirmModal from "../../../components/ConfirmModal";
@@ -153,10 +154,10 @@ export default function ApiKeysPage() {
   // Guard: No projects exist in store
   if (projects.length === 0) {
     return (
-      <div className="glass-panel rounded-xl border border-zinc-800 p-12 text-center max-w-xl mx-auto mt-8">
-        <FolderOpen className="h-10 w-10 text-zinc-550 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-zinc-200">No active projects</h3>
-        <p className="text-sm text-zinc-400 mt-2">
+      <div className="cyber-panel rounded-2xl border border-slate-800 p-12 text-center max-w-xl mx-auto mt-8 font-mono">
+        <FolderOpen className="h-10 w-10 text-slate-550 mx-auto mb-4" />
+        <h3 className="text-xs font-bold text-white uppercase tracking-widest">No active projects</h3>
+        <p className="text-xs text-slate-500 mt-2 uppercase tracking-wider">
           You must create a project workspace before you can generate API Keys.
         </p>
       </div>
@@ -166,10 +167,10 @@ export default function ApiKeysPage() {
   // Guard: Projects exist, but none is selected
   if (!selectedProjectId) {
     return (
-      <div className="glass-panel rounded-xl border border-zinc-800 p-12 text-center max-w-xl mx-auto mt-8">
-        <Info className="h-10 w-10 text-indigo-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-zinc-200">Select a project</h3>
-        <p className="text-sm text-zinc-400 mt-2">
+      <div className="cyber-panel rounded-2xl border border-slate-800 p-12 text-center max-w-xl mx-auto mt-8 font-mono">
+        <Info className="h-10 w-10 text-cyan-400 mx-auto mb-4" />
+        <h3 className="text-xs font-bold text-white uppercase tracking-widest">Select a project</h3>
+        <p className="text-xs text-slate-500 mt-2 uppercase tracking-wider">
           Please select a project from the top navbar project switcher to view and manage its API keys.
         </p>
       </div>
@@ -179,19 +180,21 @@ export default function ApiKeysPage() {
   const activeProject = projects.find((p) => p.id === selectedProjectId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-mono relative">
+      <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/5 blur-[80px] pointer-events-none" />
+
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight sm:text-2xl">API Keys</h2>
-          <p className="text-sm text-zinc-400 mt-1">
+          <h2 className="text-base font-extrabold text-white tracking-widest uppercase">API Credentials</h2>
+          <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider">
             Access keys for scoping logs ingested from your SDKs into{" "}
-            <span className="font-semibold text-zinc-200">{activeProject?.name}</span>.
+            <span className="font-semibold text-slate-200">{activeProject?.name}</span>.
           </p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-650 hover:bg-indigo-600 text-white text-sm font-semibold transition-all shadow-md"
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-900 text-xs font-bold uppercase tracking-widest transition-all shadow-md cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Generate Key
@@ -201,27 +204,27 @@ export default function ApiKeysPage() {
       {/* Keys List */}
       {isLoading ? (
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
         </div>
       ) : keys.length === 0 ? (
-        <div className="glass-panel rounded-xl border border-zinc-850 p-12 text-center max-w-md mx-auto">
-          <Key className="h-10 w-10 text-zinc-550 mx-auto mb-4" />
-          <h4 className="text-base font-semibold text-zinc-300">No keys generated</h4>
-          <p className="text-xs text-zinc-450 mt-2">
+        <div className="cyber-panel rounded-2xl border border-slate-800 p-12 text-center max-w-md mx-auto relative overflow-hidden">
+          <Key className="h-10 w-10 text-slate-655 mx-auto mb-4" />
+          <h4 className="text-xs font-bold text-white uppercase tracking-widest">No keys generated</h4>
+          <p className="text-xs text-slate-550 mt-2 uppercase tracking-wider leading-relaxed">
             Generate an API key for your SDK to authenticate and ingest logs securely.
           </p>
           <button
             onClick={() => setModalOpen(true)}
-            className="mt-6 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+            className="mt-6 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-805 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
           >
             Generate First Key
           </button>
         </div>
       ) : (
-        <div className="glass-panel rounded-xl border border-zinc-800 overflow-hidden">
+        <div className="cyber-panel rounded-2xl border border-slate-800 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-sm">
-              <thead className="border-b border-zinc-800 bg-zinc-900/30 text-xs font-semibold text-zinc-450 uppercase tracking-wider">
+            <table className="w-full border-collapse text-left text-xs">
+              <thead className="border-b border-slate-900 bg-slate-955/40 text-xs font-bold text-slate-500 uppercase tracking-widest">
                 <tr>
                   <th className="px-6 py-4">Name</th>
                   <th className="px-6 py-4">Environment</th>
@@ -231,75 +234,85 @@ export default function ApiKeysPage() {
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-850 bg-transparent text-zinc-350">
+              <tbody className="divide-y divide-slate-900 bg-transparent text-slate-350">
                 {keys.map((key) => {
                   const isVisible = visibleKeyId === key.id;
                   return (
-                    <tr key={key.id} className="hover:bg-zinc-900/10 transition-colors">
-                      <td className="px-6 py-4 font-medium text-zinc-200">{key.name}</td>
+                    <tr key={key.id} className="hover:bg-slate-900/10 transition-colors">
+                      <td className="px-6 py-4 font-bold text-slate-200 uppercase tracking-wide">{key.name}</td>
                       <td className="px-6 py-4">
                         <span
                           className={cn(
-                            "px-2 py-0.5 rounded text-[10px] font-bold border capitalize",
+                            "px-2 py-0.5 rounded text-[10px] font-extrabold border capitalize tracking-widest",
                             key.environment === "production"
-                              ? "bg-red-500/5 text-red-400 border-red-500/15"
+                              ? "bg-rose-500/5 text-rose-455 border-rose-500/15"
                               : key.environment === "staging"
-                              ? "bg-yellow-500/5 text-yellow-400 border-yellow-500/15"
-                              : "bg-indigo-500/5 text-indigo-400 border-indigo-500/15"
+                              ? "bg-amber-500/5 text-amber-400 border-amber-500/15"
+                              : "bg-cyan-500/5 text-cyan-400 border-cyan-500/15"
                           )}
                         >
                           {key.environment}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <button
-                          onClick={() => handleStatusToggle(key.id, key.is_active)}
-                          className={cn(
-                            "flex items-center gap-1.5 text-xs font-semibold focus:outline-none transition-colors",
-                            key.is_active ? "text-green-400 hover:text-green-300" : "text-zinc-500 hover:text-zinc-400"
-                          )}
-                        >
-                          <span className={cn("h-1.5 w-1.5 rounded-full", key.is_active ? "bg-green-400" : "bg-zinc-650")} />
-                          {key.is_active ? "Active" : "Disabled"}
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => handleStatusToggle(key.id, key.is_active)}
+                            disabled={statusMutation.isPending}
+                            className={cn(
+                              "relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                              key.is_active ? "bg-cyan-500" : "bg-slate-900 border-slate-800"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-slate-955 shadow ring-0 transition duration-200 ease-in-out mt-[2px]",
+                                key.is_active ? "translate-x-3.5" : "translate-x-0.5"
+                              )}
+                            />
+                          </button>
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            {key.is_active ? "ACTIVE" : "DISABLED"}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 font-mono text-xs">
                         <div className="flex items-center gap-2">
-                          <span className="text-zinc-400">
-                            {isVisible ? key.key : `ls_live_${"•".repeat(24)}`}
+                          <span className="text-slate-400 font-bold select-all bg-slate-950 px-2 py-1.5 border border-slate-900 rounded-lg">
+                            {isVisible ? key.key : "••••••••••••••••••••••••••••••••"}
                           </span>
                           <button
                             onClick={() => setVisibleKeyId(isVisible ? null : key.id)}
-                            className="p-1 rounded text-zinc-500 hover:text-zinc-350 hover:bg-zinc-800"
+                            className="p-1.5 hover:bg-slate-950 border border-transparent hover:border-slate-850 rounded-lg text-slate-500 hover:text-white transition-colors"
                           >
                             {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                           </button>
                           <button
                             onClick={() => handleCopy(key.key)}
-                            className="p-1 rounded text-zinc-500 hover:text-zinc-350 hover:bg-zinc-800"
+                            className="p-1.5 hover:bg-slate-955 border border-transparent hover:border-slate-855 rounded-lg text-slate-500 hover:text-white transition-colors"
                           >
                             <Copy className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-xs text-zinc-500">
+                      <td className="px-6 py-4 text-slate-500 text-xs">
                         {new Date(key.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => handleRotate(key.id, key.name)}
-                            className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-500 hover:text-indigo-400 transition-colors"
-                            title="Rotate API Key"
+                            className="p-1.5 rounded-lg hover:bg-slate-950 border border-transparent hover:border-slate-850 text-slate-500 hover:text-white transition-colors"
+                            title="Rotate Key"
                           >
-                            <RefreshCw className="h-4 w-4" />
+                            <RefreshCw className="h-3.5 w-3.5" />
                           </button>
                           <button
                             onClick={() => handleDelete(key.id, key.name)}
-                            className="p-1.5 rounded-md hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors"
-                            title="Revoke API Key"
+                            className="p-1.5 rounded-lg hover:bg-rose-500/10 border border-transparent hover:border-rose-500/25 text-slate-550 hover:text-rose-455 transition-colors"
+                            title="Revoke Key"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </td>
@@ -314,36 +327,47 @@ export default function ApiKeysPage() {
 
       {/* Generate API Key Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="glass-panel w-full max-w-md rounded-xl border border-zinc-800 p-6 shadow-2xl animate-fade-in relative z-50">
-            <h3 className="text-lg font-bold text-white mb-2">Generate API Key</h3>
-            <p className="text-xs text-zinc-450 mb-6">
-              Give your API key a descriptive name and scope it to an environment.
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm scale-in">
+          <div className="cyber-panel w-full max-w-md rounded-2xl border border-slate-800 p-6 shadow-2xl relative z-50">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-xs font-bold text-white uppercase tracking-widest">Generate Credential</h3>
+              <button
+                onClick={() => {
+                  reset();
+                  setModalOpen(false);
+                }}
+                className="p-1 rounded-lg hover:bg-slate-905 text-slate-500 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed uppercase tracking-wider">
+              Generate a unique access key token to start instrumenting log feeds.
             </p>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                  Key Name
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 text-xs">
+              <div className="space-y-1.5">
+                <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+                  Key Name / Purpose
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Server SDK production"
-                  className="block w-full px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  placeholder="e.g. Production Ingestion"
+                  className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                   {...register("name")}
                   disabled={createMutation.isPending}
                 />
                 {errors.name && (
-                  <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.name.message}</p>
+                  <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{errors.name.message}</p>
                 )}
               </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+              <div className="space-y-1.5">
+                <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
                   Environment Scope
                 </label>
                 <select
-                  className="block w-full px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
+                  className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-350 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono cursor-pointer"
                   {...register("environment")}
                   disabled={createMutation.isPending}
                 >
@@ -352,36 +376,34 @@ export default function ApiKeysPage() {
                   <option value="production">Production</option>
                 </select>
                 {errors.environment && (
-                  <p className="text-xs text-red-500 mt-1.5 font-medium">
-                    {errors.environment.message}
-                  </p>
+                  <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{errors.environment.message}</p>
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-900">
                 <button
                   type="button"
                   onClick={() => {
                     reset();
                     setModalOpen(false);
                   }}
-                  className="px-4 py-2 rounded-lg border border-zinc-800 hover:bg-zinc-900 text-zinc-400 hover:text-white text-xs font-semibold transition-colors"
+                  className="px-4 py-2.5 rounded-xl border border-slate-850 hover:bg-slate-950 text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer"
                   disabled={createMutation.isPending}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-semibold transition-colors shadow-lg"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
                   disabled={createMutation.isPending}
                 >
                   {createMutation.isPending ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Generating...
+                      <span>Generating...</span>
                     </>
                   ) : (
-                    "Generate"
+                    "Generate Key"
                   )}
                 </button>
               </div>
@@ -390,44 +412,73 @@ export default function ApiKeysPage() {
         </div>
       )}
 
-      {/* Copy Plain Key Modal (Shown immediately after creation/rotation) */}
+      {/* Ephemeral Generated Key Display */}
       {generatedKeyData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="glass-panel w-full max-w-md rounded-xl border border-zinc-800 p-6 shadow-2xl animate-fade-in relative z-50 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-550/20">
-                <BadgeAlert className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-bold text-white">Copy API Key Secrets</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md scale-in">
+          <div className="cyber-panel w-full max-w-lg rounded-2xl border border-cyan-500/25 p-6 shadow-2xl relative z-50">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
+                SECRET CREDENTIAL DISPLAY
+              </h3>
             </div>
-            <p className="text-xs text-zinc-450 leading-relaxed">
-              Copy this API Key secret now. For security purposes, this value is only displayed in plain-text once. It will be hidden permanently afterwards.
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed uppercase tracking-wider">
+              Copy this token key immediately. It is stored using high-grade hashes and cannot be retrieved again.
             </p>
 
-            <div className="flex items-center gap-2 p-3 bg-zinc-950 border border-zinc-850 rounded-lg font-mono text-xs text-yellow-400/90 overflow-hidden">
-              <span className="truncate flex-1 select-all">{generatedKeyData.key}</span>
-              <button
-                onClick={() => handleCopy(generatedKeyData.key)}
-                className="p-1.5 rounded hover:bg-zinc-900 text-zinc-450 hover:text-white transition-colors"
-                title="Copy API Key"
-              >
-                {copiedKey ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-              </button>
-            </div>
+            <div className="space-y-4">
+              <div className="p-4 bg-rose-500/5 border border-rose-500/15 rounded-xl flex items-start gap-3">
+                <BadgeAlert className="h-5 w-5 text-rose-500 shrink-0 mt-0.5" />
+                <div className="text-[10px] text-slate-450 leading-relaxed uppercase tracking-wider font-sans">
+                  <span className="font-bold text-slate-200 block mb-0.5">WARNING: ONE-TIME SECURITY EPHEMERAL SHIELD</span>
+                  Closing this modal terminates display. Store this key in a secure vault like AWS Secrets or 1Password.
+                </div>
+              </div>
 
-            <div className="flex justify-end pt-3">
-              <button
-                onClick={() => setGeneratedKeyData(null)}
-                className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white text-xs font-semibold transition-colors"
-              >
-                Done
-              </button>
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Key Name
+                </label>
+                <div className="text-slate-200 text-xs font-bold bg-slate-955 px-3.5 py-2.5 border border-slate-900 rounded-xl">
+                  {generatedKeyData.name}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Key Token
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={generatedKeyData.key}
+                    className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-cyan-400 font-mono select-all focus:outline-none"
+                  />
+                  <button
+                    onClick={() => handleCopy(generatedKeyData.key)}
+                    className="px-3.5 py-2 bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                  >
+                    {copiedKey ? <Check className="h-3.5 w-3.5 text-emerald-450" /> : <Copy className="h-3.5 w-3.5" />}
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-slate-900 mt-2">
+                <button
+                  onClick={() => setGeneratedKeyData(null)}
+                  className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
+                >
+                  I've Copied the Secret Key
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Confirm Deletion (Revoke) Modal */}
+      {/* Confirm Revocation Modal */}
       <ConfirmModal
         isOpen={!!keyToDelete}
         onClose={() => setKeyToDelete(null)}
@@ -437,8 +488,8 @@ export default function ApiKeysPage() {
           }
         }}
         title="Revoke API Key"
-        message={`Are you sure you want to delete "${keyToDelete?.name}"? All logging endpoints using this key will be rejected immediately.`}
-        confirmText="Revoke Key"
+        message={`Confirm revocation of API Key "${keyToDelete?.name}". Any middleware or scripts authenticating via this token will instantly raise 401 Unauthorized errors.`}
+        confirmText="Confirm Revoke"
         type="danger"
         isLoading={deleteMutation.isPending}
       />
@@ -453,8 +504,8 @@ export default function ApiKeysPage() {
           }
         }}
         title="Rotate API Key"
-        message={`Are you sure you want to rotate "${keyToRotate?.name}"? The existing key will stop working immediately, breaking any client application using it.`}
-        confirmText="Rotate Key"
+        message={`Confirm rotation of API Key "${keyToRotate?.name}". The old token will be immediately deactivated and a brand-new credentials key will be generated.`}
+        confirmText="Confirm Rotate"
         type="warning"
         isLoading={rotateMutation.isPending}
       />

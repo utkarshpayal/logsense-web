@@ -7,6 +7,8 @@ import { projectApi } from "../../lib/api";
 import { useProjectStore } from "../../store/project.store";
 import Sidebar from "@/components/layout/sidebar";
 import Navbar from "@/components/layout/navbar";
+import ChatbotDrawer from "@/components/layout/chatbot-drawer";
+import { cn } from "../../utils/cn";
 
 export default function DashboardLayout({
   children,
@@ -16,6 +18,7 @@ export default function DashboardLayout({
   const { user, isLoading: authLoading } = useAuth(true);
   const setProjects = useProjectStore((state) => state.setProjects);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [chatbotOpen, setChatbotOpen] = useState(false);
 
   const { data: projectsData, isLoading: projectsLoading } = useQuery({
     queryKey: ["projects"],
@@ -31,36 +34,36 @@ export default function DashboardLayout({
 
   if (authLoading || projectsLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-zinc-950">
+      <div className="flex h-screen w-screen items-center justify-center bg-[#05070a] font-mono">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-          <span className="text-sm text-zinc-400 font-medium">Bootstrapping LogSense...</span>
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+          <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Bootstrapping LogSense...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-950 text-zinc-50">
+    <div className="flex min-h-screen bg-[#05070a] text-slate-200">
       {/* Desktop Sidebar (Left-aligned fixed) */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-zinc-800 bg-zinc-900/40 backdrop-blur-md z-30">
+      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-slate-900 bg-[#060810]/40 backdrop-blur-md z-30">
         <Sidebar />
       </div>
 
       {/* Mobile Sidebar overlay */}
       {mobileSidebarOpen && (
-        <div className="fixed inset-0 z-40 flex md:hidden">
+        <div className="fixed inset-0 z-45 flex md:hidden">
           {/* Overlay backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileSidebarOpen(false)}
           />
           {/* Menu panel */}
-          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-zinc-900 border-r border-zinc-800 pt-5 pb-4">
+          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-[#05070a] border-r border-slate-900 pt-5 pb-4">
             <div className="absolute top-0 right-0 -mr-12 pt-2">
               <button
                 type="button"
-                className="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                className="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none"
                 onClick={() => setMobileSidebarOpen(false)}
               >
                 <span className="sr-only">Close sidebar</span>
@@ -82,12 +85,24 @@ export default function DashboardLayout({
       )}
 
       {/* Main viewport area */}
-      <div className="flex flex-col flex-1 md:pl-64 min-h-screen">
-        <Navbar onMenuClick={() => setMobileSidebarOpen(true)} />
+      <div className={cn(
+        "flex flex-col flex-1 md:pl-64 min-h-screen transition-all duration-300 ease-in-out",
+        chatbotOpen && "lg:pr-[420px]"
+      )}>
+        <Navbar 
+          onMenuClick={() => setMobileSidebarOpen(true)} 
+          onChatClick={() => setChatbotOpen(!chatbotOpen)} 
+        />
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto fade-in">
           {children}
         </main>
       </div>
+
+      {/* Right Side Chatbot Drawer */}
+      <ChatbotDrawer 
+        isOpen={chatbotOpen} 
+        onClose={() => setChatbotOpen(false)} 
+      />
     </div>
   );
 }

@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import {
   Terminal,
   Search,
-  Filter,
   RefreshCw,
   Clock,
   ChevronLeft,
@@ -59,7 +58,7 @@ export default function LogsPage() {
     queryKey: ["logs", selectedProjectId, level, service, environment, search, page],
     queryFn: () => logsApi.getLogs(queryParams),
     enabled: !!selectedProjectId,
-    refetchInterval: autoRefresh ? 5000 : false, // Poll every 5s if autoRefresh is active
+    refetchInterval: autoRefresh ? 5000 : false,
   });
 
   const logs = logsResponse?.data || [];
@@ -119,10 +118,10 @@ export default function LogsPage() {
   // Guard: No projects exist
   if (projects.length === 0) {
     return (
-      <div className="glass-panel rounded-xl border border-zinc-800 p-12 text-center max-w-xl mx-auto mt-8">
-        <FolderOpen className="h-10 w-10 text-zinc-550 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-zinc-200">No active projects</h3>
-        <p className="text-sm text-zinc-400 mt-2">
+      <div className="cyber-panel rounded-2xl border border-slate-800 p-12 text-center max-w-xl mx-auto mt-8 relative overflow-hidden font-mono">
+        <FolderOpen className="h-10 w-10 text-slate-550 mx-auto mb-4" />
+        <h3 className="text-xs font-bold text-white uppercase tracking-widest">No active projects</h3>
+        <p className="text-xs text-slate-500 mt-2 uppercase tracking-wider">
           You must create a project workspace before you can ingest or view logs.
         </p>
       </div>
@@ -132,10 +131,10 @@ export default function LogsPage() {
   // Guard: No project selected
   if (!selectedProjectId) {
     return (
-      <div className="glass-panel rounded-xl border border-zinc-800 p-12 text-center max-w-xl mx-auto mt-8">
-        <Info className="h-10 w-10 text-indigo-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-zinc-200">Select a project</h3>
-        <p className="text-sm text-zinc-400 mt-2">
+      <div className="cyber-panel rounded-2xl border border-slate-800 p-12 text-center max-w-xl mx-auto mt-8 relative overflow-hidden font-mono">
+        <Info className="h-10 w-10 text-cyan-405 mx-auto mb-4" />
+        <h3 className="text-xs font-bold text-white uppercase tracking-widest">Select a project</h3>
+        <p className="text-xs text-slate-500 mt-2 uppercase tracking-wider">
           Please select a project from the top navbar project switcher to scope the Logs Explorer feed.
         </p>
       </div>
@@ -143,26 +142,27 @@ export default function LogsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative text-xs">
+
       {/* Search and Filters Bar */}
-      <div className="glass-panel rounded-xl border border-zinc-800 p-4 sm:p-5 flex flex-col gap-4">
+      <div className="cyber-panel rounded-2xl border border-slate-800 p-4 sm:p-5 flex flex-col gap-4 relative overflow-hidden">
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search Message */}
           <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-500">
+            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-550">
               <Search className="h-4 w-4" />
             </span>
             <input
               type="text"
-              placeholder="Search log messages, trace IDs, trace_id, user_ids..."
+              placeholder="Search log messages, trace IDs, user_ids..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="block w-full pl-9 pr-4 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+              className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-500 hover:text-zinc-300"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-350 cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -176,7 +176,7 @@ export default function LogsPage() {
               placeholder="Filter Service"
               value={service}
               onChange={(e) => setService(e.target.value)}
-              className="block w-full px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
             />
           </div>
 
@@ -187,32 +187,32 @@ export default function LogsPage() {
               placeholder="Filter Environment"
               value={environment}
               onChange={(e) => setEnvironment(e.target.value)}
-              className="block w-full px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
             />
           </div>
         </div>
 
         {/* Level Tabs & Auto-refresh Row */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-zinc-850 pt-4 gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-slate-900 pt-4 gap-4">
           {/* Level selection */}
-          <div className="flex items-center gap-1 bg-zinc-950 p-1 border border-zinc-850 rounded-lg overflow-x-auto w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 bg-slate-955 p-1.5 border border-slate-800 rounded-xl overflow-x-auto w-full sm:w-auto">
             {["all", "debug", "info", "warn", "error"].map((lvl) => (
               <button
                 key={lvl}
                 onClick={() => setLevel(lvl)}
                 className={cn(
-                  "px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap",
+                  "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer",
                   level === lvl
                     ? lvl === "error"
-                      ? "bg-red-500/15 text-red-400 border border-red-500/20"
+                      ? "bg-rose-500/15 text-rose-455 border border-rose-500/25"
                       : lvl === "warn"
-                      ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
+                      ? "bg-amber-500/15 text-amber-450 border border-amber-500/25"
                       : lvl === "info"
-                      ? "bg-blue-500/15 text-blue-400 border border-blue-500/20"
+                      ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/25"
                       : lvl === "debug"
-                      ? "bg-zinc-800 text-zinc-300 border border-zinc-700"
-                      : "bg-indigo-600 text-white"
-                    : "text-zinc-450 hover:text-zinc-200"
+                      ? "bg-slate-900 text-slate-300 border border-slate-800"
+                      : "bg-cyan-500 text-slate-950"
+                    : "text-slate-500 hover:text-slate-300"
                 )}
               >
                 {lvl}
@@ -230,9 +230,9 @@ export default function LogsPage() {
                   onChange={(e) => setAutoRefresh(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-650 peer-checked:after:bg-white" />
+                <div className="w-9 h-5 bg-slate-850 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-550 after:border-slate-500 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500 peer-checked:after:bg-slate-950" />
               </label>
-              <span className="text-xs text-zinc-450 font-medium flex items-center gap-1">
+              <span className="text-xs text-slate-500 font-bold uppercase tracking-widest flex items-center gap-1.5 select-none">
                 <Clock className="h-3.5 w-3.5" />
                 Live Tail
               </span>
@@ -240,7 +240,7 @@ export default function LogsPage() {
 
             <button
               onClick={() => refetch()}
-              className="flex items-center justify-center p-2 rounded-lg border border-zinc-800 bg-zinc-950/40 text-zinc-450 hover:text-zinc-200 hover:bg-zinc-900 transition-colors"
+              className="flex items-center justify-center p-2 rounded-xl border border-slate-800 bg-slate-950/40 text-slate-500 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer"
               disabled={isFetching}
             >
               <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
@@ -249,295 +249,247 @@ export default function LogsPage() {
         </div>
       </div>
 
-      {/* Logs Table / List Shell */}
-      <div className="flex flex-col lg:flex-row gap-6 relative items-start">
-        {/* Main Logs Table */}
-        <div className="flex-1 w-full glass-panel rounded-xl border border-zinc-800 overflow-hidden relative min-h-[400px]">
+      {/* Main Viewport: Grid/Flex with inspector drawer */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start relative z-10">
+        {/* Logs Feed List */}
+        <div className="flex-1 w-full cyber-panel rounded-2xl border border-slate-800 overflow-hidden">
           {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/30">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+            <div className="flex h-96 items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+                <span className="text-xs text-slate-550 uppercase tracking-widest">Scanning clickhouse index...</span>
+              </div>
             </div>
           ) : logs.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-96 p-8 text-center">
-              <Terminal className="h-10 w-10 text-zinc-550 mb-3" />
-              <h4 className="text-sm font-semibold text-zinc-350">No logs found</h4>
-              <p className="text-xs text-zinc-500 mt-1 max-w-xs">
-                No logs matching your criteria. Make sure your SDK is using a valid API key for this workspace.
+              <Terminal className="h-10 w-10 text-slate-700 mb-4" />
+              <h4 className="text-xs font-bold text-white uppercase tracking-widest">No Logs Found</h4>
+              <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed uppercase tracking-wider">
+                Zero events matched filter criteria. Ensure SDK credentials are dispatching data packages correctly.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-850 max-h-[600px] overflow-y-auto font-mono text-xs">
-              {logs.map((log) => {
-                const isSelected = selectedLogId === log.id;
-                return (
-                  <div
-                    key={log.id}
-                    onClick={() => setSelectedLogId(log.id)}
-                    className={cn(
-                      "flex flex-col sm:flex-row items-start sm:items-center gap-3 px-5 py-3 cursor-pointer hover:bg-zinc-900/10 border-l-2 transition-all",
-                      isSelected
-                        ? "border-indigo-500 bg-indigo-950/5"
-                        : log.level === "error"
-                        ? "border-red-500/30 hover:border-red-500"
-                        : log.level === "warn"
-                        ? "border-yellow-500/30 hover:border-yellow-500"
-                        : log.level === "info"
-                        ? "border-blue-500/20 hover:border-blue-500"
-                        : "border-transparent hover:border-zinc-700"
-                    )}
-                  >
-                    {/* Timestamp & Level */}
-                    <div className="flex items-center gap-2.5 sm:w-48 shrink-0">
-                      <span className="text-zinc-550 text-[10px]">
-                        {new Date(log.created_at).toLocaleTimeString(undefined, {
-                          hour12: false,
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}
-                        <span className="text-zinc-650 ml-1">
-                          .{new Date(log.created_at).getMilliseconds().toString().padStart(3, "0")}
-                        </span>
-                      </span>
-                      <span
-                        className={cn(
-                          "px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-center w-12 border",
-                          log.level === "error"
-                            ? "bg-red-500/10 text-red-400 border-red-500/15"
-                            : log.level === "warn"
-                            ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/15"
-                            : log.level === "info"
-                            ? "bg-blue-500/10 text-blue-400 border-blue-500/15"
-                            : "bg-zinc-800 text-zinc-400 border-zinc-700"
-                        )}
-                      >
-                        {log.level}
-                      </span>
-                    </div>
-
-                    {/* Metadata tags */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {log.service && (
-                        <span className="px-1.5 py-0.5 rounded-[4px] bg-zinc-900 border border-zinc-800 text-zinc-450 text-[10px] truncate max-w-[100px]" title={`Service: ${log.service}`}>
-                          {log.service}
-                        </span>
-                      )}
-                      {log.environment && (
-                        <span className="px-1.5 py-0.5 rounded-[4px] bg-zinc-900 border border-zinc-800 text-zinc-500 text-[10px] truncate max-w-[80px]" title={`Env: ${log.environment}`}>
-                          {log.environment}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Message content */}
-                    <div className="flex-1 min-w-0 text-zinc-300 break-all select-text pr-2 line-clamp-1 sm:line-clamp-2">
-                      {log.message}
-                    </div>
-
-                    {/* Trace indicator */}
-                    {log.trace_id && (
-                      <span className="text-[10px] text-zinc-600 font-semibold uppercase tracking-wider hidden lg:inline-block shrink-0 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-900">
-                        {log.trace_id.substring(0, 8)}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Pagination Footer */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-zinc-800 px-6 py-4 bg-zinc-950/20 text-xs">
-              <span className="text-zinc-500">
-                Showing <span className="font-semibold text-zinc-350">{offset + 1}</span> to{" "}
-                <span className="font-semibold text-zinc-350">
-                  {Math.min(offset + limit, totalLogs)}
-                </span>{" "}
-                of <span className="font-semibold text-zinc-350">{totalLogs}</span> logs
-              </span>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                  disabled={page === 1}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-800 text-zinc-450 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-450 transition-colors"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Prev
-                </button>
-                <button
-                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-                  disabled={page === totalPages}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-800 text-zinc-450 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-450 transition-colors"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </button>
+            <div className="divide-y divide-slate-900">
+              {/* Table of logs */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-955 border-b border-slate-900 text-slate-550 font-bold uppercase tracking-widest text-xs">
+                      <th className="p-3">Level</th>
+                      <th className="p-3">Timestamp</th>
+                      <th className="p-3">Service</th>
+                      <th className="p-3">Message</th>
+                      <th className="p-3">Environment</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-900">
+                    {logs.map((log) => {
+                      const isSelected = selectedLogId === log.id;
+                      return (
+                        <tr
+                          key={log.id}
+                          onClick={() => setSelectedLogId(log.id)}
+                          className={cn(
+                            "cursor-pointer transition-all border-l-2",
+                            isSelected
+                              ? "bg-slate-900/60 border-cyan-400"
+                              : log.level === "error"
+                              ? "border-rose-500 hover:bg-rose-500/[0.01]"
+                              : log.level === "warn"
+                              ? "border-amber-500 hover:bg-amber-500/[0.01]"
+                              : log.level === "info"
+                              ? "border-cyan-500 hover:bg-cyan-500/[0.01]"
+                              : "border-slate-800 hover:bg-slate-900/10"
+                          )}
+                        >
+                          <td className="p-3 whitespace-nowrap">
+                            <span
+                              className={cn(
+                                "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border",
+                                log.level === "error"
+                                  ? "bg-rose-500/10 text-rose-455 border-rose-500/20"
+                                  : log.level === "warn"
+                                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                  : log.level === "info"
+                                  ? "bg-cyan-500/5 text-cyan-400 border-cyan-500/25"
+                                  : "bg-slate-950 text-slate-455 border-slate-800"
+                              )}
+                            >
+                              {log.level}
+                            </span>
+                          </td>
+                          <td className="p-3 whitespace-nowrap text-slate-500">
+                            {new Date(log.created_at).toLocaleTimeString()}
+                          </td>
+                          <td className="p-3 whitespace-nowrap font-bold text-slate-350">{log.service}</td>
+                          <td className="p-3 font-mono break-all max-w-lg truncate text-slate-200">
+                            {log.message}
+                          </td>
+                          <td className="p-3 whitespace-nowrap text-slate-500 uppercase tracking-wider">{log.environment}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
+
+              {/* Pagination controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between p-4 bg-slate-955/40 text-xs text-slate-500 font-bold uppercase tracking-widest">
+                  <span>
+                    Records: {(page - 1) * limit + 1}-{Math.min(page * limit, totalLogs)} of {totalLogs}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="p-1.5 rounded-lg border border-slate-855 hover:bg-slate-950 text-slate-550 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <span className="text-slate-300 font-bold tracking-wider font-mono text-xs">
+                      Page {page} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      className="p-1.5 rounded-lg border border-slate-855 hover:bg-slate-950 text-slate-550 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Slide-out Sidebar Drawer Inspector */}
+        {/* Sidebar Inspector Drawer */}
         {selectedLogId && (
-          <div className="w-full lg:w-96 shrink-0 glass-panel rounded-xl border border-zinc-800 overflow-hidden sticky top-24 animate-fade-in">
+          <div className="w-full lg:w-96 cyber-panel rounded-2xl border border-slate-800 divide-y divide-slate-900 shrink-0 scale-in relative overflow-hidden">
+            {/* Drawer Header */}
+            <div className="p-4 bg-slate-955 flex items-center justify-between">
+              <h3 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
+                <Terminal className="h-4.5 w-4.5 text-cyan-400" />
+                Log Inspector
+              </h3>
+              <button
+                onClick={() => setSelectedLogId(null)}
+                className="p-1 rounded-lg hover:bg-slate-900 text-slate-500 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+            </div>
+
             {detailsLoading ? (
               <div className="flex h-64 items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+                <Loader2 className="h-5 w-5 animate-spin text-cyan-405" />
               </div>
             ) : selectedLog ? (
-              <div className="p-5 space-y-5">
-                {/* Drawer Header */}
-                <div className="flex items-start justify-between border-b border-zinc-850 pb-4">
-                  <div className="flex flex-col gap-1.5">
-                    <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                      <Cpu className="h-4 w-4 text-indigo-400" />
-                      Log Details
-                    </h3>
-                    <span className="text-[10px] text-zinc-550 font-mono select-all">ID: {selectedLog.id}</span>
+              <div className="p-5 space-y-5 max-h-[600px] overflow-y-auto">
+                {/* Level / Timestamp */}
+                <div className="flex items-center justify-between">
+                  <span
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[10px] font-bold uppercase border",
+                      selectedLog.level === "error"
+                        ? "bg-rose-500/10 text-rose-455 border-rose-500/25"
+                        : selectedLog.level === "warn"
+                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        : selectedLog.level === "info"
+                        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/25"
+                        : "bg-slate-950 border-slate-800 text-slate-400"
+                    )}
+                  >
+                    {selectedLog.level}
+                  </span>
+                  <span className="text-xs text-slate-500">{new Date(selectedLog.created_at).toLocaleString()}</span>
+                </div>
+
+                {/* Primary message */}
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                    Message payload
+                  </label>
+                  <p className="p-3 bg-slate-950 border border-slate-850 rounded-xl font-mono text-xs text-slate-200 leading-relaxed break-all whitespace-pre-wrap select-text">
+                    {selectedLog.message}
+                  </p>
+                </div>
+
+                {/* Trace ID Scope */}
+                {selectedLog.trace_id && (
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                      Trace ID Correlation
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={selectedLog.trace_id}
+                        className="block w-full px-3.5 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-cyan-400 font-mono select-all focus:outline-none"
+                      />
+                      <button
+                        onClick={() => searchTrace(selectedLog.trace_id!)}
+                        className="px-2.5 py-1.5 bg-slate-955 border border-slate-800 hover:border-cyan-500/30 text-slate-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer"
+                      >
+                        Scope ID
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => handleDeleteLog(selectedLog.id)}
-                      className="p-1.5 rounded-md hover:bg-red-500/10 text-zinc-550 hover:text-red-400 transition-colors"
-                      title="Delete log event"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => setSelectedLogId(null)}
-                      className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-450 hover:text-white transition-colors"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                )}
+
+                {/* Metadata Fields */}
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="space-y-1">
+                    <span className="block text-[10px] font-bold text-slate-555 uppercase tracking-widest">Service</span>
+                    <span className="text-xs font-bold text-slate-300 block truncate">{selectedLog.service}</span>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="block text-[10px] font-bold text-slate-555 uppercase tracking-widest">Environment</span>
+                    <span className="text-xs font-bold text-slate-350 block truncate uppercase tracking-wider">{selectedLog.environment}</span>
                   </div>
                 </div>
 
-                {/* Details Section */}
-                <div className="space-y-4 font-mono text-[11px] leading-relaxed">
-                  {/* Timestamp */}
-                  <div>
-                    <span className="block text-[10px] font-semibold text-zinc-550 uppercase tracking-wider font-sans mb-1">
-                      Timestamp
-                    </span>
-                    <span className="text-zinc-350">{new Date(selectedLog.created_at).toLocaleString()}</span>
+                {/* Structured JSON Payload */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                      JSON Context Attributes
+                    </label>
+                    <button
+                      onClick={() => handleCopy(JSON.stringify(selectedLog.metadata, null, 2), "Metadata")}
+                      className="text-slate-500 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      {copiedText === "Metadata" ? <Check className="h-3.5 w-3.5 text-emerald-450" /> : <Copy className="h-3.5 w-3.5" />}
+                    </button>
                   </div>
+                  <pre className="p-3 bg-slate-950 border border-slate-850 rounded-xl font-mono text-xs text-slate-400 leading-relaxed overflow-x-auto select-text max-h-48">
+                    <code>{JSON.stringify(selectedLog.metadata || {}, null, 2)}</code>
+                  </pre>
+                </div>
 
-                  {/* Level & Scopes */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="block text-[10px] font-semibold text-zinc-550 uppercase tracking-wider font-sans mb-1">
-                        Severity
-                      </span>
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border",
-                          selectedLog.level === "error"
-                            ? "bg-red-500/10 text-red-400 border-red-500/15"
-                            : selectedLog.level === "warn"
-                            ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/15"
-                            : selectedLog.level === "info"
-                            ? "bg-blue-500/10 text-blue-400 border-blue-500/15"
-                            : "bg-zinc-800 text-zinc-400 border-zinc-700"
-                        )}
-                      >
-                        {selectedLog.level}
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="block text-[10px] font-semibold text-zinc-550 uppercase tracking-wider font-sans mb-1">
-                        Host
-                      </span>
-                      <span className="text-zinc-350 truncate block" title={selectedLog.hostname}>
-                        {selectedLog.hostname || "Unknown"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Service & Environment */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="block text-[10px] font-semibold text-zinc-550 uppercase tracking-wider font-sans mb-1">
-                        Service
-                      </span>
-                      <span className="text-zinc-300 font-semibold">{selectedLog.service || "N/A"}</span>
-                    </div>
-
-                    <div>
-                      <span className="block text-[10px] font-semibold text-zinc-550 uppercase tracking-wider font-sans mb-1">
-                        Environment
-                      </span>
-                      <span className="text-zinc-300 font-semibold">{selectedLog.environment || "N/A"}</span>
-                    </div>
-                  </div>
-
-                  {/* Trace ID */}
-                  {selectedLog.trace_id && (
-                    <div>
-                      <span className="block text-[10px] font-semibold text-zinc-550 uppercase tracking-wider font-sans mb-1">
-                        Trace ID
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-indigo-400 font-semibold select-all truncate">{selectedLog.trace_id}</span>
-                        <button
-                          onClick={() => handleCopy(selectedLog.trace_id!, "Trace ID")}
-                          className="p-1 rounded text-zinc-500 hover:text-zinc-350"
-                        >
-                          <Copy className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={() => searchTrace(selectedLog.trace_id!)}
-                          className="text-[10px] px-2 py-0.5 bg-indigo-650 hover:bg-indigo-600 rounded text-white font-sans font-semibold transition-colors"
-                        >
-                          Find Traces
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Full Log message */}
-                  <div>
-                    <span className="block text-[10px] font-semibold text-zinc-550 uppercase tracking-wider font-sans mb-1.5">
-                      Log Message
-                    </span>
-                    <pre className="p-3 bg-zinc-950 border border-zinc-850 rounded-lg text-[11px] text-zinc-300 leading-normal max-h-48 overflow-y-auto whitespace-pre-wrap select-text break-all">
-                      <code>{selectedLog.message}</code>
-                    </pre>
-                  </div>
-
-                  {/* Full structured metadata JSON */}
-                  <div>
-                    <span className="block text-[10px] font-semibold text-zinc-550 uppercase tracking-wider font-sans mb-1.5 flex justify-between items-center">
-                      Aggregated Metadata
-                      {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 && (
-                        <button
-                          onClick={() => handleCopy(JSON.stringify(selectedLog.metadata, null, 2), "Metadata JSON")}
-                          className="text-zinc-500 hover:text-zinc-350 flex items-center gap-1 font-sans"
-                        >
-                          <Copy className="h-3 w-3" />
-                          Copy
-                        </button>
-                      )}
-                    </span>
-                    {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 ? (
-                      <pre className="p-3 bg-zinc-950 border border-zinc-850 rounded-lg text-[10px] text-indigo-300 overflow-x-auto max-h-56 leading-relaxed select-text">
-                        <code>{JSON.stringify(selectedLog.metadata, null, 2)}</code>
-                      </pre>
-                    ) : (
-                      <span className="text-zinc-550 italic">No associated metadata context.</span>
-                    )}
-                  </div>
+                {/* Dangerous revoker */}
+                <div className="flex items-center justify-end border-t border-slate-900 pt-4 mt-2">
+                  <button
+                    onClick={() => handleDeleteLog(selectedLog.id)}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Purge Record
+                  </button>
                 </div>
               </div>
             ) : (
-              <div className="p-8 text-center text-zinc-500 italic text-xs">Error displaying details</div>
+              <div className="flex h-48 items-center justify-center text-slate-550 italic uppercase text-xs tracking-widest">
+                Failed to parse details.
+              </div>
             )}
           </div>
         )}
       </div>
-      {/* Confirm Log Deletion Modal */}
+
+      {/* Confirm Deletion Modal */}
       <ConfirmModal
         isOpen={!!logToDeleteId}
         onClose={() => setLogToDeleteId(null)}
@@ -546,9 +498,9 @@ export default function LogsPage() {
             deleteMutation.mutate(logToDeleteId);
           }
         }}
-        title="Delete Log Entry"
-        message="Are you sure you want to delete this log? This operation is permanent and cannot be undone."
-        confirmText="Delete Log"
+        title="Purge Telemetry Record"
+        message="Confirm deletion. The database event row will be permanently purged from the Clickhouse engine. This action is irreversible."
+        confirmText="Confirm Purge"
         type="danger"
         isLoading={deleteMutation.isPending}
       />
