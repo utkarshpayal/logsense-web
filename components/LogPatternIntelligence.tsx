@@ -8,7 +8,7 @@ interface Log {
   id: string;
   level: string;
   message: string;
-  service: string;
+  service?: string;
 }
 
 interface PatternGroup {
