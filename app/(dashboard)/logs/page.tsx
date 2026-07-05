@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { logsApi } from "../../../lib/api";
+import { logsApi, dashboardApi } from "../../../lib/api";
 import { useProjectStore } from "../../../store/project.store";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   Terminal,
@@ -20,27 +21,71 @@ import {
   Check,
   Cpu,
   Trash2,
+  Download,
+  Keyboard,
+  Filter,
 } from "lucide-react";
 import { cn } from "../../../utils/cn";
 import ConfirmModal from "../../../components/ConfirmModal";
+import { JsonViewer } from "../../../components/JsonViewer";
+import { AiLogAnalyzer } from "../../../components/AiLogAnalyzer";
+import { LogMinimap } from "../../../components/LogMinimap";
+import { TraceWaterfall } from "../../../components/TraceWaterfall";
+import { LogPatternIntelligence } from "../../../components/LogPatternIntelligence";
 
 export default function LogsPage() {
   const queryClient = useQueryClient();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { selectedProjectId, projects } = useProjectStore();
 
   // Filter States
   const [search, setSearch] = useState("");
   const [level, setLevel] = useState<string>("all");
+  const [category, setCategory] = useState<string>("all");
   const [service, setService] = useState("");
   const [environment, setEnvironment] = useState("");
+  const [timeRange, setTimeRange] = useState("24h");
   const [page, setPage] = useState(1);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [logToDeleteId, setLogToDeleteId] = useState<string | null>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [inspectorTab, setInspectorTab] = useState<"details" | "trace">("details");
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close export menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const limit = 50;
   const offset = (page - 1) * limit;
+
+  let startDate: string | undefined = undefined;
+  if (timeRange !== "all") {
+    const now = new Date();
+    if (timeRange === "15m") now.setMinutes(now.getMinutes() - 15);
+    else if (timeRange === "1h") now.setHours(now.getHours() - 1);
+    else if (timeRange === "24h") now.setHours(now.getHours() - 24);
+    else if (timeRange === "7d") now.setDate(now.getDate() - 7);
+    else if (timeRange === "30d") now.setDate(now.getDate() - 30);
+    startDate = now.toISOString();
+  }
+
+  // Fetch Services for Dropdown
+  const { data: servicesResponse } = useQuery({
+    queryKey: ["services", selectedProjectId],
+    queryFn: () => dashboardApi.getServices(selectedProjectId!),
+    enabled: !!selectedProjectId,
+  });
+  const availableServices = servicesResponse?.data || [];
 
   // Build query params
   const queryParams: any = {
@@ -48,14 +93,15 @@ export default function LogsPage() {
     level: level !== "all" ? level : undefined,
     service: service || undefined,
     environment: environment || undefined,
-    search: search || undefined,
+    search: [search, category !== "all" ? category : ""].filter(Boolean).join(" ") || undefined,
+    startDate,
     limit,
     offset,
   };
 
   // Fetch Logs
   const { data: logsResponse, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ["logs", selectedProjectId, level, service, environment, search, page],
+    queryKey: ["logs", selectedProjectId, level, category, service, environment, search, timeRange, page],
     queryFn: () => logsApi.getLogs(queryParams),
     enabled: !!selectedProjectId,
     refetchInterval: autoRefresh ? 5000 : false,
@@ -96,7 +142,7 @@ export default function LogsPage() {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [level, service, environment, search, selectedProjectId]);
+  }, [level, category, service, environment, search, timeRange, selectedProjectId]);
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -105,12 +151,65 @@ export default function LogsPage() {
     setTimeout(() => setCopiedText(null), 2000);
   };
 
+  // Export logs as CSV or JSON
+  const exportLogs = (format: "csv" | "json") => {
+    if (logs.length === 0) { toast.error("No logs to export."); return; }
+    if (format === "json") {
+      const blob = new Blob([JSON.stringify(logs, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url;
+      a.download = `logsense-export-${Date.now()}.json`;
+      a.click(); URL.revokeObjectURL(url);
+    } else {
+      const headers = ["id","level","message","service","environment","created_at","trace_id"];
+      const rows = logs.map(l => headers.map(h => JSON.stringify((l as any)[h] ?? "")).join(","));
+      const csv = [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url;
+      a.download = `logsense-export-${Date.now()}.csv`;
+      a.click(); URL.revokeObjectURL(url);
+    }
+    toast.success(`Exported ${logs.length} logs as ${format.toUpperCase()}`);
+  };
+
+  // Keyboard shortcuts: j/k to navigate, Esc to close
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA") return;
+      if (e.key === "Escape") { setSelectedLogId(null); return; }
+      if (!logs.length) return;
+      const currentIdx = logs.findIndex(l => l.id === selectedLogId);
+      if (e.key === "j") { // next
+        const next = currentIdx < logs.length - 1 ? logs[currentIdx + 1] : logs[0];
+        setSelectedLogId(next.id);
+      } else if (e.key === "k") { // prev
+        const prev = currentIdx > 0 ? logs[currentIdx - 1] : logs[logs.length - 1];
+        setSelectedLogId(prev.id);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [logs, selectedLogId]);
+
+  // Active filters
+  const activeFilters = [
+    service && { key: "service", label: `Service: ${service}`, clear: () => setService("") },
+    environment && { key: "env", label: `Env: ${environment}`, clear: () => setEnvironment("") },
+    level !== "all" && { key: "level", label: `Level: ${level}`, clear: () => setLevel("all") },
+    category !== "all" && { key: "cat", label: `Category: ${category}`, clear: () => setCategory("all") },
+    timeRange !== "24h" && { key: "time", label: `Time: ${timeRange}`, clear: () => setTimeRange("24h") },
+    search && { key: "search", label: `"${search}"`, clear: () => setSearch("") },
+  ].filter(Boolean) as { key: string; label: string; clear: () => void }[];
+
   // Quick trace navigation
   const searchTrace = (traceId: string) => {
     setSearch(traceId);
     setLevel("all");
+    setCategory("all");
     setService("");
     setEnvironment("");
+    setTimeRange("all");
     setSelectedLogId(null);
     toast.info(`Filtering logs by trace ID: ${traceId}`);
   };
@@ -145,7 +244,7 @@ export default function LogsPage() {
     <div className="space-y-6 relative text-xs">
 
       {/* Search and Filters Bar */}
-      <div className="cyber-panel rounded-2xl border border-slate-800 p-4 sm:p-5 flex flex-col gap-4 relative overflow-hidden">
+      <div className="cyber-panel rounded-2xl border border-slate-800 p-4 sm:p-5 flex flex-col gap-4 relative">
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search Message */}
           <div className="relative flex-1">
@@ -171,53 +270,100 @@ export default function LogsPage() {
 
           {/* Service Filter */}
           <div className="w-full md:w-44">
-            <input
-              type="text"
-              placeholder="Filter Service"
+            <select
               value={service}
               onChange={(e) => setService(e.target.value)}
-              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
-            />
+              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/10 transition-all font-sans appearance-none cursor-pointer"
+            >
+              <option value="">All Services</option>
+              {availableServices.map((s) => (
+                <option key={s.service} value={s.service}>{s.service}</option>
+              ))}
+            </select>
           </div>
 
           {/* Environment Filter */}
-          <div className="w-full md:w-44">
-            <input
-              type="text"
-              placeholder="Filter Environment"
+          <div className="w-full md:w-36">
+            <select
               value={environment}
               onChange={(e) => setEnvironment(e.target.value)}
-              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
-            />
+              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/10 transition-all font-sans appearance-none cursor-pointer"
+            >
+              <option value="">All Envs</option>
+              <option value="development">Development</option>
+              <option value="staging">Staging</option>
+              <option value="production">Production</option>
+            </select>
+          </div>
+
+          {/* Time Range Filter */}
+          <div className="w-full md:w-36">
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/10 transition-all cursor-pointer font-sans appearance-none"
+            >
+              <option value="15m">Last 15m</option>
+              <option value="1h">Last 1h</option>
+              <option value="24h">Last 24h</option>
+              <option value="7d">Last 7d</option>
+              <option value="30d">Last 30d</option>
+              <option value="all">All Time</option>
+            </select>
           </div>
         </div>
 
         {/* Level Tabs & Auto-refresh Row */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-slate-900 pt-4 gap-4">
-          {/* Level selection */}
-          <div className="flex items-center gap-1.5 bg-slate-955 p-1.5 border border-slate-800 rounded-xl overflow-x-auto w-full sm:w-auto">
-            {["all", "debug", "info", "warn", "error"].map((lvl) => (
-              <button
-                key={lvl}
-                onClick={() => setLevel(lvl)}
-                className={cn(
-                  "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer",
-                  level === lvl
-                    ? lvl === "error"
-                      ? "bg-rose-500/15 text-rose-455 border border-rose-500/25"
-                      : lvl === "warn"
-                      ? "bg-amber-500/15 text-amber-450 border border-amber-500/25"
-                      : lvl === "info"
-                      ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/25"
-                      : lvl === "debug"
-                      ? "bg-slate-900 text-slate-300 border border-slate-800"
-                      : "bg-cyan-500 text-slate-950"
-                    : "text-slate-500 hover:text-slate-300"
-                )}
-              >
-                {lvl}
-              </button>
-            ))}
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+            {/* Level selection */}
+            <div className="flex items-center gap-1.5 bg-slate-955 p-1.5 border border-slate-800 rounded-xl overflow-x-auto w-full sm:w-auto">
+              {["all", "debug", "info", "warn", "error"].map((lvl) => (
+                <button
+                  key={lvl}
+                  onClick={() => setLevel(lvl)}
+                  className={cn(
+                    "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer",
+                    level === lvl
+                      ? lvl === "error"
+                        ? "bg-rose-500/15 text-rose-455 border border-rose-500/25"
+                        : lvl === "warn"
+                        ? "bg-amber-500/15 text-amber-450 border border-amber-500/25"
+                        : lvl === "info"
+                        ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/25"
+                        : lvl === "debug"
+                        ? "bg-slate-900 text-slate-300 border border-slate-800"
+                        : "bg-cyan-500 text-slate-950"
+                      : "text-slate-500 hover:text-slate-300"
+                  )}
+                >
+                  {lvl}
+                </button>
+              ))}
+            </div>
+
+            {/* Category selection */}
+            <div className="flex items-center gap-1.5 bg-slate-955 p-1.5 border border-slate-800 rounded-xl overflow-x-auto w-full sm:w-auto">
+              {[
+                { id: "all", label: "All Types" },
+                { id: "database", label: "DB Logs" },
+                { id: "http", label: "Req/Res" },
+                { id: "third_party", label: "3rd Party" }
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategory(cat.id)}
+                  className={cn(
+                    "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer",
+                    category === cat.id
+                      ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                      : "text-slate-500 hover:text-slate-300"
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Controls */}
@@ -242,12 +388,105 @@ export default function LogsPage() {
               onClick={() => refetch()}
               className="flex items-center justify-center p-2 rounded-xl border border-slate-800 bg-slate-950/40 text-slate-500 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer"
               disabled={isFetching}
+              title="Refresh"
             >
               <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
             </button>
+
+            {/* Export Dropdown */}
+            <div ref={exportMenuRef} className="relative">
+              <button
+                onClick={() => setShowExportMenu(v => !v)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium transition-colors cursor-pointer",
+                  showExportMenu
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-slate-800 bg-slate-950/40 text-slate-400 hover:text-white hover:bg-slate-900"
+                )}
+                title="Export logs"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Export
+              </button>
+              {showExportMenu && (
+                <div className="absolute bg-black right-0 top-full mt-1.5 z-50 flex flex-col bg-card border border-border rounded-xl shadow-2xl overflow-hidden min-w-[130px] scale-in">
+                  <button
+                    onClick={() => { exportLogs("csv"); setShowExportMenu(false); }}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-gray-800 transition-colors cursor-pointer font-medium"
+                  >
+                    Export as CSV
+                  </button>
+                  <button
+                    onClick={() => { exportLogs("json"); setShowExportMenu(false); }}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-gray-800 transition-colors cursor-pointer font-medium"
+                  >
+                    Export as JSON
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Active Filter Chips + Result Count Bar */}
+      {(activeFilters.length > 0 || totalLogs > 0) && (
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            {activeFilters.length > 0 && (
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Filter className="h-3.5 w-3.5" />
+                Active:
+              </span>
+            )}
+            {activeFilters.map(f => (
+              <span key={f.key} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary border border-primary/20">
+                {f.label}
+                <button onClick={f.clear} className="ml-0.5 hover:text-foreground transition-colors cursor-pointer">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+            {activeFilters.length > 1 && (
+              <button
+                onClick={() => { setLevel("all"); setCategory("all"); setService(""); setEnvironment(""); setSearch(""); setTimeRange("24h"); }}
+                className="text-xs text-muted-foreground hover:text-destructive transition-colors cursor-pointer underline underline-offset-2"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-4">
+            {totalLogs > 0 && (
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {totalLogs.toLocaleString()} events · page {page}/{totalPages}
+              </span>
+            )}
+            {selectedLogId && (
+              <div className="hidden lg:flex items-center gap-2 text-[11px] text-muted-foreground/50">
+                <kbd className="px-1.5 py-0.5 rounded border border-border bg-card font-mono text-[10px]">j</kbd>
+                <kbd className="px-1.5 py-0.5 rounded border border-border bg-card font-mono text-[10px]">k</kbd>
+                <span>navigate</span>
+                <kbd className="px-1.5 py-0.5 rounded border border-border bg-card font-mono text-[10px]">Esc</kbd>
+                <span>close</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Pattern Intelligence — above the logs table */}
+      {logs.length > 0 && (
+        <LogPatternIntelligence
+          logs={logs}
+          onSelectPattern={(ids) => {
+            // Highlight the first matching log in this page
+            const first = logs.find(l => ids.includes(l.id));
+            if (first) setSelectedLogId(first.id);
+            toast.info(`Pattern group: ${ids.length} matching events`);
+          }}
+        />
+      )}
 
       {/* Main Viewport: Grid/Flex with inspector drawer */}
       <div className="flex flex-col lg:flex-row gap-6 items-start relative z-10">
@@ -269,18 +508,22 @@ export default function LogsPage() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-900">
-              {/* Table of logs */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
+            <div className="flex flex-col h-full divide-y divide-border">
+              <div className="relative flex flex-1 overflow-hidden">
+                {/* Table of logs */}
+                <div 
+                  ref={scrollContainerRef}
+                  className="flex-1 w-full pr-4 overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)] custom-scrollbar"
+                >
+                  <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-955 border-b border-slate-900 text-slate-550 font-bold uppercase tracking-widest text-xs">
-                      <th className="p-3">Level</th>
-                      <th className="p-3">Timestamp</th>
-                      <th className="p-3">Service</th>
-                      <th className="p-3">Message</th>
-                      <th className="p-3">Environment</th>
-                    </tr>
+                    <tr className="sticky top-0 z-10 bg-zinc-950 border-b border-zinc-800 text-zinc-400 font-semibold text-[11px] uppercase tracking-widest">
+                       <th className="p-3 pl-4">Level</th>
+                       <th className="p-3">Timestamp</th>
+                       <th className="p-3">Service</th>
+                       <th className="p-3">Message</th>
+                       <th className="p-3">Environment</th>
+                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-900">
                     {logs.map((log) => {
@@ -288,42 +531,63 @@ export default function LogsPage() {
                       return (
                         <tr
                           key={log.id}
+                          id={`log-row-${log.id}`}
                           onClick={() => setSelectedLogId(log.id)}
                           className={cn(
-                            "cursor-pointer transition-all border-l-2",
+                            "cursor-pointer transition-colors duration-100 border-l-[3px] group",
                             isSelected
-                              ? "bg-slate-900/60 border-cyan-400"
+                              ? "bg-primary/[0.08] border-primary"
                               : log.level === "error"
-                              ? "border-rose-500 hover:bg-rose-500/[0.01]"
+                              ? "border-destructive hover:bg-destructive/10 hover:border-destructive"
                               : log.level === "warn"
-                              ? "border-amber-500 hover:bg-amber-500/[0.01]"
+                              ? "border-amber-500/70 hover:bg-amber-500/10"
                               : log.level === "info"
-                              ? "border-cyan-500 hover:bg-cyan-500/[0.01]"
-                              : "border-slate-800 hover:bg-slate-900/10"
+                              ? "border-primary/50 hover:bg-primary/[0.06]"
+                              : "border-zinc-800 hover:bg-zinc-800/40"
                           )}
                         >
-                          <td className="p-3 whitespace-nowrap">
+                          <td className="p-3 pl-4 whitespace-nowrap">
                             <span
                               className={cn(
-                                "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border",
+                                "px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border",
                                 log.level === "error"
-                                  ? "bg-rose-500/10 text-rose-455 border-rose-500/20"
+                                  ? "bg-rose-500/15 text-rose-400 border-rose-500/30"
                                   : log.level === "warn"
-                                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                  ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
                                   : log.level === "info"
-                                  ? "bg-cyan-500/5 text-cyan-400 border-cyan-500/25"
-                                  : "bg-slate-950 text-slate-455 border-slate-800"
+                                  ? "bg-blue-500/15 text-blue-400 border-blue-500/25"
+                                  : "bg-zinc-800 text-zinc-400 border-zinc-700"
                               )}
                             >
                               {log.level}
                             </span>
                           </td>
-                          <td className="p-3 whitespace-nowrap text-slate-500">
+                          <td className="p-3 whitespace-nowrap text-zinc-500 tabular-nums text-[11px]">
                             {new Date(log.created_at).toLocaleTimeString()}
                           </td>
-                          <td className="p-3 whitespace-nowrap font-bold text-slate-350">{log.service}</td>
-                          <td className="p-3 font-mono break-all max-w-lg truncate text-slate-200">
-                            {log.message}
+                          <td className="p-3 whitespace-nowrap text-[11px] font-semibold text-zinc-300 group-hover:text-zinc-100 transition-colors">{log.service}</td>
+                          <td className="p-3 font-mono break-all max-w-lg truncate text-zinc-300 group-hover:text-zinc-100 transition-colors text-[11px]">
+                            <span className="block mb-1">{log.message}</span>
+                            {/* Inline Metadata Tags */}
+                            {log.metadata && typeof log.metadata === 'object' && Object.keys(log.metadata).length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                {['action', 'status', 'method', 'latency_ms', 'latency'].map(key => {
+                                  if (log?.metadata?.[key] !== undefined) {
+                                    const val = log.metadata[key];
+                                    const isErrorStatus = key === 'status' && Number(val) >= 400;
+                                    return (
+                                      <span key={key} className={cn(
+                                        "inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] border font-bold uppercase tracking-wider",
+                                        isErrorStatus ? "bg-rose-500/10 text-rose-400 border-rose-500/20" : "bg-slate-900 border-slate-700 text-slate-400"
+                                      )}>
+                                        <span className="text-slate-500 mr-1">{key}:</span> {val}
+                                      </span>
+                                    );
+                                  }
+                                  return null;
+                                })}
+                              </div>
+                            )}
                           </td>
                           <td className="p-3 whitespace-nowrap text-slate-500 uppercase tracking-wider">{log.environment}</td>
                         </tr>
@@ -331,6 +595,23 @@ export default function LogsPage() {
                     })}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Minimap Overlay */}
+              <LogMinimap 
+                logs={logs} 
+                onLogClick={(id) => {
+                  setSelectedLogId(id);
+                  const el = document.getElementById(`log-row-${id}`);
+                  if (el && scrollContainerRef.current) {
+                    const container = scrollContainerRef.current;
+                    const topPos = el.offsetTop - container.offsetTop;
+                    container.scrollTo({ top: topPos - 40, behavior: 'smooth' });
+                  }
+                }} 
+                selectedLogId={selectedLogId} 
+                containerRef={scrollContainerRef} 
+              />
               </div>
 
               {/* Pagination controls */}
@@ -366,19 +647,42 @@ export default function LogsPage() {
 
         {/* Sidebar Inspector Drawer */}
         {selectedLogId && (
-          <div className="w-full lg:w-96 cyber-panel rounded-2xl border border-slate-800 divide-y divide-slate-900 shrink-0 scale-in relative overflow-hidden">
-            {/* Drawer Header */}
-            <div className="p-4 bg-slate-955 flex items-center justify-between">
-              <h3 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
-                <Terminal className="h-4.5 w-4.5 text-cyan-400" />
-                Log Inspector
-              </h3>
-              <button
-                onClick={() => setSelectedLogId(null)}
-                className="p-1 rounded-lg hover:bg-slate-900 text-slate-500 hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="h-4.5 w-4.5" />
-              </button>
+          <div className="w-full lg:w-[420px] cyber-panel rounded-2xl border border-slate-800 divide-y divide-slate-900 shrink-0 scale-in relative overflow-hidden flex flex-col">
+            {/* Drawer Header with tabs */}
+            <div className="p-4 bg-slate-955 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
+                  <Terminal className="h-4.5 w-4.5 text-cyan-400" />
+                  Log Inspector
+                </h3>
+                <button
+                  onClick={() => setSelectedLogId(null)}
+                  className="p-1 rounded-lg hover:bg-slate-900 text-slate-500 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="h-4.5 w-4.5" />
+                </button>
+              </div>
+              {/* Tabs */}
+              <div className="flex items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-slate-800">
+                <button
+                  onClick={() => setInspectorTab("details")}
+                  className={cn(
+                    "flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all cursor-pointer",
+                    inspectorTab === "details" ? "bg-primary text-white shadow" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Details
+                </button>
+                <button
+                  onClick={() => setInspectorTab("trace")}
+                  className={cn(
+                    "flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all cursor-pointer",
+                    inspectorTab === "trace" ? "bg-primary text-white shadow" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  ⚡ Trace Timeline
+                </button>
+              </div>
             </div>
 
             {detailsLoading ? (
@@ -386,99 +690,114 @@ export default function LogsPage() {
                 <Loader2 className="h-5 w-5 animate-spin text-cyan-405" />
               </div>
             ) : selectedLog ? (
-              <div className="p-5 space-y-5 max-h-[600px] overflow-y-auto">
-                {/* Level / Timestamp */}
-                <div className="flex items-center justify-between">
-                  <span
-                    className={cn(
-                      "px-2 py-0.5 rounded text-[10px] font-bold uppercase border",
-                      selectedLog.level === "error"
-                        ? "bg-rose-500/10 text-rose-455 border-rose-500/25"
-                        : selectedLog.level === "warn"
-                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                        : selectedLog.level === "info"
-                        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/25"
-                        : "bg-slate-950 border-slate-800 text-slate-400"
-                    )}
-                  >
-                    {selectedLog.level}
-                  </span>
-                  <span className="text-xs text-slate-500">{new Date(selectedLog.created_at).toLocaleString()}</span>
-                </div>
-
-                {/* Primary message */}
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                    Message payload
-                  </label>
-                  <p className="p-3 bg-slate-950 border border-slate-850 rounded-xl font-mono text-xs text-slate-200 leading-relaxed break-all whitespace-pre-wrap select-text">
-                    {selectedLog.message}
-                  </p>
-                </div>
-
-                {/* Trace ID Scope */}
-                {selectedLog.trace_id && (
-                  <div className="space-y-1.5">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                      Trace ID Correlation
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        readOnly
-                        value={selectedLog.trace_id}
-                        className="block w-full px-3.5 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-cyan-400 font-mono select-all focus:outline-none"
+              <div className="overflow-y-auto max-h-[calc(100vh-320px)] custom-scrollbar">
+                {/* TRACE TIMELINE TAB */}
+                {inspectorTab === "trace" ? (
+                  <div className="p-4">
+                    {selectedLog.trace_id ? (
+                      <TraceWaterfall
+                        traceId={selectedLog.trace_id}
+                        projectId={selectedProjectId}
+                        anchorLogId={selectedLog.id}
                       />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-12 gap-2 text-center">
+                        <span className="text-2xl">🔍</span>
+                        <p className="text-xs text-muted-foreground">This log has no trace_id.</p>
+                        <p className="text-[10px] text-muted-foreground/50">Trace correlation requires a trace_id in the log payload.</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* DETAILS TAB */
+                  <div className="p-4 space-y-4">
+
+                    {/* Level + timestamp row */}
+                    <div className="flex items-center justify-between">
+                      <span className={cn(
+                        "inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border",
+                        selectedLog.level === "error" ? "bg-rose-500/15 text-rose-400 border-rose-500/25" :
+                        selectedLog.level === "warn"  ? "bg-amber-500/15 text-amber-400 border-amber-500/25" :
+                        selectedLog.level === "info"  ? "bg-blue-500/15 text-blue-400 border-blue-500/25" :
+                        "bg-zinc-800 text-zinc-400 border-zinc-700"
+                      )}>
+                        {selectedLog.level}
+                      </span>
+                      <span className="text-[11px] text-zinc-500 tabular-nums">
+                        {new Date(selectedLog.created_at).toLocaleString()}
+                      </span>
+                    </div>
+
+                    {/* Message */}
+                    <div>
+                      <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-wider mb-1.5">Message</p>
+                      <p className="px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg font-mono text-[12px] text-zinc-200 leading-relaxed break-all whitespace-pre-wrap select-text">
+                        {selectedLog.message}
+                      </p>
+                    </div>
+
+                    {/* AI Analyzer */}
+                    <AiLogAnalyzer log={selectedLog} projectId={selectedProjectId} />
+
+                    {/* Service + Environment */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
+                        <p className="text-[10px] text-zinc-600 uppercase tracking-wider font-medium mb-1">Service</p>
+                        <p className="text-[12px] font-semibold text-zinc-200 truncate">{selectedLog.service}</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
+                        <p className="text-[10px] text-zinc-600 uppercase tracking-wider font-medium mb-1">Environment</p>
+                        <p className="text-[12px] font-semibold text-zinc-200 truncate">{selectedLog.environment}</p>
+                      </div>
+                    </div>
+
+                    {/* Trace ID */}
+                    {selectedLog.trace_id && (
+                      <div>
+                        <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-wider mb-1.5">Trace ID</p>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-[11px] text-sky-400 font-mono truncate select-all">
+                            {selectedLog.trace_id}
+                          </code>
+                          <button
+                            onClick={() => setInspectorTab("trace")}
+                            className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-violet-500/10 border border-violet-500/25 text-violet-300 text-[11px] font-medium hover:bg-violet-500/20 transition-colors cursor-pointer whitespace-nowrap"
+                          >
+                            ⚡ Timeline
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* JSON Metadata */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-wider">Metadata</p>
+                        <button
+                          onClick={() => handleCopy(JSON.stringify(selectedLog.metadata, null, 2), "Metadata")}
+                          className="flex items-center gap-1 text-[10px] text-zinc-600 hover:text-zinc-300 transition-colors cursor-pointer"
+                        >
+                          {copiedText === "Metadata" ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                          {copiedText === "Metadata" ? "Copied" : "Copy"}
+                        </button>
+                      </div>
+                      <div className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-lg overflow-x-auto select-text max-h-64 custom-scrollbar">
+                        <JsonViewer data={selectedLog.metadata || {}} />
+                      </div>
+                    </div>
+
+                    {/* Delete */}
+                    <div className="pt-2 border-t border-zinc-800">
                       <button
-                        onClick={() => searchTrace(selectedLog.trace_id!)}
-                        className="px-2.5 py-1.5 bg-slate-955 border border-slate-800 hover:border-cyan-500/30 text-slate-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer"
+                        onClick={() => handleDeleteLog(selectedLog.id)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] text-zinc-600 hover:text-rose-400 hover:bg-rose-500/8 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer font-medium"
                       >
-                        Scope ID
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete this log
                       </button>
                     </div>
                   </div>
                 )}
-
-                {/* Metadata Fields */}
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div className="space-y-1">
-                    <span className="block text-[10px] font-bold text-slate-555 uppercase tracking-widest">Service</span>
-                    <span className="text-xs font-bold text-slate-300 block truncate">{selectedLog.service}</span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="block text-[10px] font-bold text-slate-555 uppercase tracking-widest">Environment</span>
-                    <span className="text-xs font-bold text-slate-350 block truncate uppercase tracking-wider">{selectedLog.environment}</span>
-                  </div>
-                </div>
-
-                {/* Structured JSON Payload */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                      JSON Context Attributes
-                    </label>
-                    <button
-                      onClick={() => handleCopy(JSON.stringify(selectedLog.metadata, null, 2), "Metadata")}
-                      className="text-slate-500 hover:text-white transition-colors flex items-center gap-1"
-                    >
-                      {copiedText === "Metadata" ? <Check className="h-3.5 w-3.5 text-emerald-450" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                  <pre className="p-3 bg-slate-950 border border-slate-850 rounded-xl font-mono text-xs text-slate-400 leading-relaxed overflow-x-auto select-text max-h-48">
-                    <code>{JSON.stringify(selectedLog.metadata || {}, null, 2)}</code>
-                  </pre>
-                </div>
-
-                {/* Dangerous revoker */}
-                <div className="flex items-center justify-end border-t border-slate-900 pt-4 mt-2">
-                  <button
-                    onClick={() => handleDeleteLog(selectedLog.id)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Purge Record
-                  </button>
-                </div>
               </div>
             ) : (
               <div className="flex h-48 items-center justify-center text-slate-550 italic uppercase text-xs tracking-widest">

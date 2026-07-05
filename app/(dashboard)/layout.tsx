@@ -34,19 +34,19 @@ export default function DashboardLayout({
 
   if (authLoading || projectsLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#05070a] font-mono">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
-          <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Bootstrapping LogSense...</span>
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-5">
+          <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-primary/30 border-t-primary" />
+          <span className="text-sm text-muted-foreground font-medium">Bootstrapping LogSense...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#05070a] text-slate-200">
+    <div className="flex min-h-screen bg-background text-foreground">
       {/* Desktop Sidebar (Left-aligned fixed) */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-slate-900 bg-[#060810]/40 backdrop-blur-md z-30">
+      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-border bg-background/80 backdrop-blur-xl z-30">
         <Sidebar />
       </div>
 
@@ -55,11 +55,11 @@ export default function DashboardLayout({
         <div className="fixed inset-0 z-45 flex md:hidden">
           {/* Overlay backdrop */}
           <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileSidebarOpen(false)}
           />
           {/* Menu panel */}
-          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-[#05070a] border-r border-slate-900 pt-5 pb-4">
+          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-card border-r border-border pt-5 pb-4">
             <div className="absolute top-0 right-0 -mr-12 pt-2">
               <button
                 type="button"
