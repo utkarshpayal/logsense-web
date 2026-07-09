@@ -395,7 +395,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Slack & Discord Webhooks */}
+                {/* Discord Webhooks */}
                 <div className="cyber-panel p-6 rounded-2xl border border-slate-800 space-y-6">
                   <div>
                     <h3 className="text-xs font-bold text-white uppercase tracking-widest">ChatOps Integrations</h3>

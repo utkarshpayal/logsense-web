@@ -114,7 +114,7 @@ export default function ChatbotDrawer({ isOpen, onClose }: ChatbotDrawerProps) {
             <h3 className="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-widest">
               AI Observability
               <span className="flex items-center gap-0.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/25 uppercase tracking-widest">
-                Gemini
+                Ollama
               </span>
             </h3>
             <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">Telemetry Agent Console</p>
@@ -185,19 +185,20 @@ export default function ChatbotDrawer({ isOpen, onClose }: ChatbotDrawerProps) {
                   : "bg-slate-950 border-slate-900"
               )}>
                 <div className="space-y-3.5 flex-1 min-w-0">
-                  {chatResponse.error && chatResponse.errorType === "CONFIG_ERROR" ? (
+                  {chatResponse.error && (chatResponse.errorType === "CONFIG_ERROR" || chatResponse.text.includes("fetch failed") || chatResponse.text.includes("ECONNREFUSED") || chatResponse.text.includes("Ollama")) ? (
                     <div className="space-y-3">
                       <p className="text-slate-350 font-bold leading-relaxed uppercase tracking-wider">
-                        {chatResponse.text}
+                        {chatResponse.text.includes("fetch") || chatResponse.text.includes("ECONNREFUSED") ? "Ollama server connection failed" : chatResponse.text}
                       </p>
                       <div className="p-3 bg-slate-950 border border-slate-850 rounded-lg space-y-2 text-[10px] uppercase tracking-wider font-mono">
                         <span className="block font-bold text-amber-500">
-                          Configuration required:
+                          Ollama setup required:
                         </span>
                         <ol className="list-decimal list-inside text-slate-500 space-y-1 normal-case">
-                          <li>Open <code className="text-slate-200">logsense-server/.env</code></li>
-                          <li>Add <code className="text-cyan-405">GEMINI_API_KEY=key</code></li>
-                          <li>Restart the server.</li>
+                          <li>Ensure Ollama is running: <code className="text-slate-200">ollama serve</code></li>
+                          <li>Pull the chat model: <code className="text-cyan-455">ollama pull phi3:mini</code></li>
+                          <li>Pull the embedding model: <code className="text-cyan-455">ollama pull nomic-embed-text</code></li>
+                          <li>Verify <code className="text-slate-200">logsense-server/.env</code> matches your OLLAMA_BASE_URL.</li>
                         </ol>
                       </div>
                     </div>
