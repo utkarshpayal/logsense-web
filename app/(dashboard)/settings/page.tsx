@@ -38,11 +38,6 @@ export default function SettingsPage() {
   const [minSeverity, setMinSeverity] = useState("error");
   const [alertsSaving, setAlertsSaving] = useState(false);
 
-  // Slack Integration
-  const [slackAlerts, setSlackAlerts] = useState(false);
-  const [slackWebhook, setSlackWebhook] = useState("");
-  const [slackTesting, setSlackTesting] = useState(false);
-
   // Discord Integration
   const [discordAlerts, setDiscordAlerts] = useState(false);
   const [discordWebhook, setDiscordWebhook] = useState("");
@@ -60,8 +55,6 @@ export default function SettingsPage() {
       setEmailAlerts(user.email_alerts ?? true);
       setEmailFrequency(user.email_frequency ?? "daily");
       setMinSeverity(user.min_severity ?? "error");
-      setSlackAlerts(user.slack_alerts ?? false);
-      setSlackWebhook(user.slack_webhook_url ?? "");
       setDiscordAlerts(user.discord_alerts ?? false);
       setDiscordWebhook(user.discord_webhook_url ?? "");
       setRetentionDays(user.retention_days ?? 30);
@@ -113,8 +106,6 @@ export default function SettingsPage() {
         email_alerts: emailAlerts,
         email_frequency: emailFrequency,
         min_severity: minSeverity,
-        slack_alerts: slackAlerts,
-        slack_webhook_url: slackWebhook || null,
         discord_alerts: discordAlerts,
         discord_webhook_url: discordWebhook || null,
       });
@@ -131,17 +122,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleTestSlack = () => {
-    if (!slackWebhook) {
-      toast.error("Please provide a Slack Webhook URL to test.");
-      return;
-    }
-    setSlackTesting(true);
-    setTimeout(() => {
-      setSlackTesting(false);
-      toast.success("Slack Webhook test message dispatched!");
-    }, 1200);
-  };
+
 
   const handleTestDiscord = () => {
     if (!discordWebhook) {
@@ -423,47 +404,6 @@ export default function SettingsPage() {
                     </p>
                   </div>
                   <div className="space-y-5">
-                    {/* Slack */}
-                    <div className="p-4 border border-slate-855 bg-slate-955/25 rounded-xl space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="block font-bold text-slate-200 uppercase tracking-widest text-xs">Slack Webhook Channel</span>
-                        <button
-                          type="button"
-                          onClick={() => setSlackAlerts(!slackAlerts)}
-                          className={cn(
-                            "relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                            slackAlerts ? "bg-cyan-500" : "bg-slate-900 border-slate-800"
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-slate-955 shadow ring-0 transition duration-200 ease-in-out mt-[2px]",
-                              slackAlerts ? "translate-x-3.5" : "translate-x-0.5"
-                            )}
-                          />
-                        </button>
-                      </div>
-                      {slackAlerts && (
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="https://hooks.slack.com/services/..."
-                            value={slackWebhook}
-                            onChange={(e) => setSlackWebhook(e.target.value)}
-                            className="block w-full px-3.5 py-2.5 bg-slate-955 border border-slate-805 rounded-xl text-xs text-slate-202 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
-                          />
-                          <button
-                            type="button"
-                            onClick={handleTestSlack}
-                            disabled={slackTesting}
-                            className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer whitespace-nowrap"
-                          >
-                            {slackTesting ? "Testing..." : "Test Link"}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
                     {/* Discord */}
                     <div className="p-4 border border-slate-855 bg-slate-955/25 rounded-xl space-y-4">
                       <div className="flex items-center justify-between">

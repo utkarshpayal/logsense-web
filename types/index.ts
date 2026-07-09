@@ -2,12 +2,10 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  slack_webhook_url?: string | null;
   discord_webhook_url?: string | null;
   email_alerts?: boolean;
   email_frequency?: string;
   min_severity?: string;
-  slack_alerts?: boolean;
   discord_alerts?: boolean;
   retention_days?: number;
 }
@@ -18,7 +16,6 @@ export interface Project {
   description?: string;
   owner_id: string;
   discord_webhook_url?: string | null;
-  slack_webhook_url?: string | null;
   created_at: string;
   updated_at: string;
 }

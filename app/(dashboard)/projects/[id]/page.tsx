@@ -25,7 +25,6 @@ const updateProjectSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters").max(100).trim(),
   description: z.string().max(500).optional(),
   discord_webhook_url: z.string().url("Must be a valid URL").or(z.literal("")).nullable().optional(),
-  slack_webhook_url: z.string().url("Must be a valid URL").or(z.literal("")).nullable().optional(),
 });
 
 type UpdateFormValues = z.infer<typeof updateProjectSchema>;
@@ -59,7 +58,6 @@ export default function ProjectDetailPage() {
       name: project.name,
       description: project.description || "",
       discord_webhook_url: project.discord_webhook_url || "",
-      slack_webhook_url: project.slack_webhook_url || "",
     } : undefined,
   });
 
@@ -84,7 +82,6 @@ export default function ProjectDetailPage() {
     const payload = {
       ...values,
       discord_webhook_url: values.discord_webhook_url === "" ? null : values.discord_webhook_url,
-      slack_webhook_url: values.slack_webhook_url === "" ? null : values.slack_webhook_url,
     };
     updateMutation.mutate(payload);
   };
@@ -352,22 +349,6 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
               />
               {errors.discord_webhook_url && (
                 <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{errors.discord_webhook_url.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
-                Slack Webhook URL
-              </label>
-              <input
-                type="text"
-                placeholder="https://hooks.slack.com/services/..."
-                className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-202 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
-                {...register("slack_webhook_url")}
-                disabled={updateMutation.isPending}
-              />
-              {errors.slack_webhook_url && (
-                <p className="text-[10px] text-rose-500 mt-1 font-bold uppercase tracking-wider">{errors.slack_webhook_url.message}</p>
               )}
             </div>
 

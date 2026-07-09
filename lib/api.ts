@@ -79,12 +79,10 @@ export const authApi = {
   updateSettings: async (data: {
     name?: string;
     email?: string;
-    slack_webhook_url?: string | null;
     discord_webhook_url?: string | null;
     email_alerts?: boolean;
     email_frequency?: string;
     min_severity?: string;
-    slack_alerts?: boolean;
     discord_alerts?: boolean;
     retention_days?: number;
   }): Promise<MeResponse> => {
@@ -112,7 +110,6 @@ export const projectApi = {
       name?: string;
       description?: string;
       discord_webhook_url?: string | null;
-      slack_webhook_url?: string | null;
     }
   ): Promise<ApiResponse<Project>> => {
     const res = await api.put<ApiResponse<Project>>(`/projects/${id}`, data);
