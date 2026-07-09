@@ -12,6 +12,7 @@ import {
   Settings,
   LogOut,
   Cpu,
+  Map,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 
@@ -25,6 +26,7 @@ export default function Sidebar({ closeMobileMenu }: SidebarProps) {
 
   const navigation = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Active Users Map", href: "/active-users", icon: Map },
     { name: "Logs Explorer", href: "/logs", icon: Terminal },
     { name: "API Keys", href: "/api-keys", icon: Key },
     { name: "Projects", href: "/projects", icon: FolderGit2 },

@@ -24,6 +24,7 @@ export interface AuthResponse {
 
 export interface MeResponse {
   success: boolean;
+  message?: string;
   data: User;
 }
 
@@ -75,6 +76,21 @@ export const authApi = {
     const res = await api.get<MeResponse>("/auth/me");
     return res.data;
   },
+  updateSettings: async (data: {
+    name?: string;
+    email?: string;
+    slack_webhook_url?: string | null;
+    discord_webhook_url?: string | null;
+    email_alerts?: boolean;
+    email_frequency?: string;
+    min_severity?: string;
+    slack_alerts?: boolean;
+    discord_alerts?: boolean;
+    retention_days?: number;
+  }): Promise<MeResponse> => {
+    const res = await api.put<MeResponse>("/auth/settings", data);
+    return res.data;
+  },
 };
 
 export const projectApi = {
@@ -90,7 +106,15 @@ export const projectApi = {
     const res = await api.post<ApiResponse<Project>>("/projects", data);
     return res.data;
   },
-  updateProject: async (id: string, data: { name?: string; description?: string }): Promise<ApiResponse<Project>> => {
+  updateProject: async (
+    id: string,
+    data: {
+      name?: string;
+      description?: string;
+      discord_webhook_url?: string | null;
+      slack_webhook_url?: string | null;
+    }
+  ): Promise<ApiResponse<Project>> => {
     const res = await api.put<ApiResponse<Project>>(`/projects/${id}`, data);
     return res.data;
   },
@@ -168,6 +192,12 @@ export const dashboardApi = {
   },
   getRecentErrors: async (projectId?: string): Promise<ApiResponse<DashboardRecentErrorItem[]>> => {
     const res = await api.get<ApiResponse<DashboardRecentErrorItem[]>>("/dashboard/recent-errors", {
+      params: { projectId },
+    });
+    return res.data;
+  },
+  getOnboarding: async (projectId?: string): Promise<ApiResponse<Log[]>> => {
+    const res = await api.get<ApiResponse<Log[]>>("/dashboard/onboarding", {
       params: { projectId },
     });
     return res.data;

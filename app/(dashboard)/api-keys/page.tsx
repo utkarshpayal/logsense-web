@@ -45,6 +45,7 @@ export default function ApiKeysPage() {
   const [visibleKeyId, setVisibleKeyId] = useState<string | null>(null);
   const [keyToRotate, setKeyToRotate] = useState<{ id: string; name: string } | null>(null);
   const [keyToDelete, setKeyToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [sessionKeys, setSessionKeys] = useState<Record<string, string>>({});
 
   const {
     register,
@@ -74,6 +75,7 @@ export default function ApiKeysPage() {
       if (response.success && response.data) {
         queryClient.invalidateQueries({ queryKey: ["apiKeys", selectedProjectId] });
         setGeneratedKeyData({ name: response.data.name, key: response.data.key });
+        setSessionKeys((prev) => ({ ...prev, [response.data.id]: response.data.key }));
         reset();
         setModalOpen(false);
       } else {
@@ -104,6 +106,7 @@ export default function ApiKeysPage() {
       if (response.success && response.data) {
         queryClient.invalidateQueries({ queryKey: ["apiKeys", selectedProjectId] });
         setGeneratedKeyData({ name: response.data.name, key: response.data.key });
+        setSessionKeys((prev) => ({ ...prev, [response.data.id]: response.data.key }));
         toast.success("API Key rotated successfully!");
       }
       setKeyToRotate(null);
@@ -132,7 +135,11 @@ export default function ApiKeysPage() {
     createMutation.mutate(values);
   };
 
-  const handleCopy = (text: string) => {
+  const handleCopy = (text: string | undefined | null) => {
+    if (!text) {
+      toast.error("For security, the full API key can only be copied when first generated or rotated. Please rotate it if lost.");
+      return;
+    }
     navigator.clipboard.writeText(text);
     setCopiedKey(true);
     toast.success("API Key copied to clipboard!");
@@ -279,7 +286,9 @@ export default function ApiKeysPage() {
                       <td className="px-6 py-4 font-mono text-xs">
                         <div className="flex items-center gap-2">
                           <span className="text-slate-400 font-bold select-all bg-slate-950 px-2 py-1.5 border border-slate-900 rounded-lg">
-                            {isVisible ? key.key : "••••••••••••••••••••••••••••••••"}
+                            {isVisible
+                              ? (sessionKeys[key.id] || `${key.prefix}••••••••••••••••••••`)
+                              : "••••••••••••••••••••••••••••••••"}
                           </span>
                           <button
                             onClick={() => setVisibleKeyId(isVisible ? null : key.id)}
@@ -288,8 +297,9 @@ export default function ApiKeysPage() {
                             {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                           </button>
                           <button
-                            onClick={() => handleCopy(key.key)}
+                            onClick={() => handleCopy(sessionKeys[key.id])}
                             className="p-1.5 hover:bg-slate-955 border border-transparent hover:border-slate-855 rounded-lg text-slate-500 hover:text-white transition-colors"
+                            title="Copy API Key"
                           >
                             <Copy className="h-3.5 w-3.5" />
                           </button>

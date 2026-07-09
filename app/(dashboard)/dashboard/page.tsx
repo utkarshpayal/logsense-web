@@ -16,8 +16,16 @@ import {
   ArrowUpRight,
   TrendingUp,
   CheckCircle2,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "../../../utils/cn";
+import {
+  Map,
+  MapMarker,
+  MarkerContent,
+  MarkerLabel,
+  MarkerPopup,
+} from "../../../components/ui/map";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -53,11 +61,44 @@ export default function DashboardPage() {
     enabled: !!selectedProjectId,
   });
 
+  const { data: onboardingRes, isLoading: onboardingLoading } = useQuery({
+    queryKey: ["dashboardOnboarding", selectedProjectId],
+    queryFn: () => dashboardApi.getOnboarding(selectedProjectId!),
+    enabled: !!selectedProjectId,
+  });
+
   const overview = overviewRes?.data;
   const timeline = timelineRes?.data || [];
   const logLevels = logLevelsRes?.data || [];
   const services = servicesRes?.data || [];
   const recentErrors = errorsRes?.data || [];
+  const onboardingLogs = onboardingRes?.data || [];
+
+  const onboardingMarkers = onboardingLogs
+    .filter((log) => {
+      const onboarding = log.metadata?.onboarding;
+      return onboarding && onboarding.location && typeof onboarding.location.latitude === "number" && typeof onboarding.location.longitude === "number";
+    })
+    .map((log) => {
+      const onboarding = log.metadata!.onboarding;
+      const loc = onboarding.location;
+      return {
+        id: log.id,
+        userId: onboarding.userId,
+        step: onboarding.step || "onboarded",
+        city: loc.city || "Unknown City",
+        country: loc.country || "Unknown Country",
+        ip: loc.ip || "Unknown IP",
+        lat: loc.latitude,
+        lng: loc.longitude,
+        createdAt: log.created_at,
+        metadata: onboarding.metadata || {},
+      };
+    });
+
+  const mapCenter = onboardingMarkers.length > 0
+    ? [onboardingMarkers[0].lng, onboardingMarkers[0].lat] as [number, number]
+    : [77.2090, 28.6139] as [number, number]; // New Delhi default center
 
   // Bezier spline path helper
   const getTimelinePath = (isError = false) => {
@@ -122,7 +163,7 @@ export default function DashboardPage() {
   }
 
   const activeProject = projects.find((p) => p.id === selectedProjectId);
-  const isLoading = overviewLoading || timelineLoading || levelsLoading || servicesLoading || errorsLoading;
+  const isLoading = overviewLoading || timelineLoading || levelsLoading || servicesLoading || errorsLoading || onboardingLoading;
   const hasErrors = (overview?.errorCount || 0) > 0;
 
   return (
@@ -326,6 +367,99 @@ export default function DashboardPage() {
                   No data yet
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Active User Onboarding Map */}
+          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-cyan-500 animate-pulse" />
+                  <h2 className="text-sm font-semibold text-white">Active User Onboarding Map</h2>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">Real-time user onboarding coordinates and telemetry</p>
+              </div>
+              <div className="text-xs text-slate-400 font-mono">
+                {onboardingMarkers.length} active marker(s)
+              </div>
+            </div>
+
+            <div className="h-[400px] w-full rounded-xl overflow-hidden border border-slate-800">
+              <Map center={mapCenter} zoom={onboardingMarkers.length > 0 ? 5 : 2}>
+                {onboardingMarkers.map((marker) => (
+                  <MapMarker key={marker.id} longitude={marker.lng} latitude={marker.lat}>
+                    <MarkerContent>
+                      <div className="size-5 flex items-center justify-center cursor-pointer rounded-full border border-cyan-400 bg-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:scale-125">
+                        <span className="size-2 rounded-full bg-cyan-400 animate-pulse" />
+                      </div>
+                      <MarkerLabel position="bottom">
+                        {marker.userId} ({marker.city})
+                      </MarkerLabel>
+                    </MarkerContent>
+                    <MarkerPopup className="w-72 p-0 bg-slate-900 border border-slate-850">
+                      {/* Popup Header with map theme colors */}
+                      <div className="relative h-20 bg-gradient-to-r from-cyan-950 to-slate-900 px-4 py-3 flex items-center gap-3 border-b border-slate-800/60">
+                        <div className="p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-xl">
+                          <UserCheck className="size-5 text-cyan-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-cyan-400 font-semibold tracking-wider uppercase">User Onboarding</p>
+                          <h3 className="text-sm text-white font-bold leading-none mt-1 font-mono">{marker.userId}</h3>
+                        </div>
+                      </div>
+
+                      {/* Popup Body */}
+                      <div className="p-4 space-y-3.5 text-xs">
+                        {/* Location & IP Details */}
+                        <div className="grid grid-cols-2 gap-3.5">
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">City</span>
+                            <span className="text-slate-200 font-medium mt-0.5 block">{marker.city}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Country</span>
+                            <span className="text-slate-200 font-medium mt-0.5 block">{marker.country}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">IP Address</span>
+                            <span className="text-slate-350 font-mono mt-0.5 block">{marker.ip}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Current Step</span>
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mt-0.5">
+                              {marker.step}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Completed sections (if present) */}
+                        {marker.metadata && Object.keys(marker.metadata).length > 0 && (
+                          <div className="pt-2.5 border-t border-slate-850">
+                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">Metadata</span>
+                            <div className="flex flex-wrap gap-1.5 max-h-16 overflow-y-auto pr-1">
+                              {Object.entries(marker.metadata).map(([key, val]) => (
+                                <span key={key} className="px-1.5 py-0.5 rounded text-[10px] bg-slate-950 border border-slate-800 text-slate-400 font-mono">
+                                  {key}: {Array.isArray(val) ? val.join(", ") : String(val)}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Footer with date */}
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-850 text-[10px] text-slate-500">
+                          <span className="flex items-center gap-1">
+                            <Clock className="size-3" />
+                            {new Date(marker.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                          <span>{new Date(marker.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </MarkerPopup>
+                  </MapMarker>
+                ))}
+              </Map>
             </div>
           </div>
 

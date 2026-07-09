@@ -1,10 +1,5 @@
 import { create } from "zustand";
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { User } from "../types";
 
 interface AuthState {
   user: User | null;
@@ -13,6 +8,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   setAuth: (user: User | null, token: string | null, refreshToken?: string | null) => void;
+  updateUser: (user: User) => void;
   logout: () => void;
   initialize: () => void;
 }
@@ -23,6 +19,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   refreshToken: null,
   isAuthenticated: false,
   isLoading: true,
+  updateUser: (user) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+    set({ user });
+  },
   setAuth: (user, token, refreshToken) => {
     if (typeof window !== "undefined") {
       if (token) {

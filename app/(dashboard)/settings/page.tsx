@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuthStore } from "../../../store/auth.store";
 import { toast } from "sonner";
 import {
@@ -14,6 +14,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { cn } from "../../../utils/cn";
+import { authApi } from "../../../lib/api";
 
 type TabType = "profile" | "alerts" | "retention";
 
@@ -22,8 +23,8 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("profile");
 
   // State: Profile settings
-  const [displayName, setDisplayName] = useState(user?.name || "John Dev");
-  const [email, setEmail] = useState(user?.email || "john@example.com");
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
 
   // State: Password settings
@@ -51,14 +52,42 @@ export default function SettingsPage() {
   const [retentionDays, setRetentionDays] = useState(30);
   const [retentionSaving, setRetentionSaving] = useState(false);
 
+  // Sync state whenever user object is available
+  useEffect(() => {
+    if (user) {
+      setDisplayName(user.name || "");
+      setEmail(user.email || "");
+      setEmailAlerts(user.email_alerts ?? true);
+      setEmailFrequency(user.email_frequency ?? "daily");
+      setMinSeverity(user.min_severity ?? "error");
+      setSlackAlerts(user.slack_alerts ?? false);
+      setSlackWebhook(user.slack_webhook_url ?? "");
+      setDiscordAlerts(user.discord_alerts ?? false);
+      setDiscordWebhook(user.discord_webhook_url ?? "");
+      setRetentionDays(user.retention_days ?? 30);
+    }
+  }, [user]);
+
   // Handlers
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setProfileSaving(true);
-    setTimeout(() => {
+    try {
+      const res = await authApi.updateSettings({
+        name: displayName,
+        email: email,
+      });
+      if (res.success && res.data) {
+        useAuthStore.getState().updateUser(res.data);
+        toast.success("Profile details updated successfully!");
+      } else {
+        toast.error(res.message || "Failed to update profile.");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to update profile.");
+    } finally {
       setProfileSaving(false);
-      toast.success("Profile details updated successfully!");
-    }, 800);
+    }
   };
 
   const handleUpdatePassword = (e: React.FormEvent) => {
@@ -76,13 +105,30 @@ export default function SettingsPage() {
     }, 1000);
   };
 
-  const handleSaveAlerts = (e: React.FormEvent) => {
+  const handleSaveAlerts = async (e: React.FormEvent) => {
     e.preventDefault();
     setAlertsSaving(true);
-    setTimeout(() => {
+    try {
+      const res = await authApi.updateSettings({
+        email_alerts: emailAlerts,
+        email_frequency: emailFrequency,
+        min_severity: minSeverity,
+        slack_alerts: slackAlerts,
+        slack_webhook_url: slackWebhook || null,
+        discord_alerts: discordAlerts,
+        discord_webhook_url: discordWebhook || null,
+      });
+      if (res.success && res.data) {
+        useAuthStore.getState().updateUser(res.data);
+        toast.success("Notification preferences updated successfully!");
+      } else {
+        toast.error(res.message || "Failed to update notification preferences.");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to update notification preferences.");
+    } finally {
       setAlertsSaving(false);
-      toast.success("Notification preferences updated successfully!");
-    }, 800);
+    }
   };
 
   const handleTestSlack = () => {
@@ -109,12 +155,23 @@ export default function SettingsPage() {
     }, 1200);
   };
 
-  const handleSaveRetention = () => {
+  const handleSaveRetention = async () => {
     setRetentionSaving(true);
-    setTimeout(() => {
+    try {
+      const res = await authApi.updateSettings({
+        retention_days: retentionDays,
+      });
+      if (res.success && res.data) {
+        useAuthStore.getState().updateUser(res.data);
+        toast.success("Storage retention policies updated!");
+      } else {
+        toast.error(res.message || "Failed to update retention policy.");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to update retention policy.");
+    } finally {
       setRetentionSaving(false);
-      toast.success("Storage retention policies updated!");
-    }, 800);
+    }
   };
 
   // Cost estimates based on retention slider
@@ -286,18 +343,19 @@ export default function SettingsPage() {
           {/* TAB 2: Alerting & Webhooks */}
           {activeTab === "alerts" && (
             <div className="space-y-6 scale-in">
-              <div className="cyber-panel p-6 rounded-2xl border border-slate-800 space-y-5">
-                <div>
-                  <h3 className="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-widest">
-                    <Bell className="h-4.5 w-4.5 text-cyan-400" />
-                    Notification Routing
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed uppercase tracking-wider">
-                    Set up alert relays and webhooks to trigger notifications on exception spikes.
-                  </p>
-                </div>
+              <form onSubmit={handleSaveAlerts} className="space-y-6">
+                {/* Email Routing */}
+                <div className="cyber-panel p-6 rounded-2xl border border-slate-800 space-y-5">
+                  <div>
+                    <h3 className="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-widest">
+                      <Bell className="h-4.5 w-4.5 text-cyan-400" />
+                      Notification Routing
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed uppercase tracking-wider">
+                      Set up alert relays and webhooks to trigger notifications on exception spikes.
+                    </p>
+                  </div>
 
-                <form onSubmit={handleSaveAlerts} className="space-y-5">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-3.5 border border-slate-855 bg-slate-955/25 rounded-xl">
                       <div className="space-y-0.5">
@@ -354,108 +412,113 @@ export default function SettingsPage() {
                       </div>
                     )}
                   </div>
-
-                  <div className="flex justify-end pt-4 border-t border-slate-900">
-                    <button
-                      type="submit"
-                      disabled={alertsSaving}
-                      className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 cursor-pointer"
-                    >
-                      {alertsSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                      Save Preferences
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              {/* Slack & Discord Webhooks */}
-              <div className="cyber-panel p-6 rounded-2xl border border-slate-800 space-y-6">
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest">ChatOps Integrations</h3>
-                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed uppercase tracking-wider">
-                    Forward telemetry alerts directly to corporate communication channels.
-                  </p>
                 </div>
-                <div className="space-y-5">
-                  {/* Slack */}
-                  <div className="p-4 border border-slate-855 bg-slate-955/25 rounded-xl space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="block font-bold text-slate-200 uppercase tracking-widest text-xs">Slack Webhook Channel</span>
-                      <button
-                        onClick={() => setSlackAlerts(!slackAlerts)}
-                        className={cn(
-                          "relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                          slackAlerts ? "bg-cyan-500" : "bg-slate-900 border-slate-800"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-slate-955 shadow ring-0 transition duration-200 ease-in-out mt-[2px]",
-                            slackAlerts ? "translate-x-3.5" : "translate-x-0.5"
-                          )}
-                        />
-                      </button>
-                    </div>
-                    {slackAlerts && (
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="https://hooks.slack.com/services/..."
-                          value={slackWebhook}
-                          onChange={(e) => setSlackWebhook(e.target.value)}
-                          className="block w-full px-3.5 py-2.5 bg-slate-955 border border-slate-805 rounded-xl text-xs text-slate-202 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
-                        />
+
+                {/* Slack & Discord Webhooks */}
+                <div className="cyber-panel p-6 rounded-2xl border border-slate-800 space-y-6">
+                  <div>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-widest">ChatOps Integrations</h3>
+                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed uppercase tracking-wider">
+                      Forward telemetry alerts directly to corporate communication channels.
+                    </p>
+                  </div>
+                  <div className="space-y-5">
+                    {/* Slack */}
+                    <div className="p-4 border border-slate-855 bg-slate-955/25 rounded-xl space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="block font-bold text-slate-200 uppercase tracking-widest text-xs">Slack Webhook Channel</span>
                         <button
-                          onClick={handleTestSlack}
-                          disabled={slackTesting}
-                          className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer whitespace-nowrap"
+                          type="button"
+                          onClick={() => setSlackAlerts(!slackAlerts)}
+                          className={cn(
+                            "relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                            slackAlerts ? "bg-cyan-500" : "bg-slate-900 border-slate-800"
+                          )}
                         >
-                          {slackTesting ? "Testing..." : "Test Link"}
+                          <span
+                            className={cn(
+                              "pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-slate-955 shadow ring-0 transition duration-200 ease-in-out mt-[2px]",
+                              slackAlerts ? "translate-x-3.5" : "translate-x-0.5"
+                            )}
+                          />
                         </button>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Discord */}
-                  <div className="p-4 border border-slate-855 bg-slate-955/25 rounded-xl space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="block font-bold text-slate-200 uppercase tracking-widest text-xs">Discord Webhook Channel</span>
-                      <button
-                        onClick={() => setDiscordAlerts(!discordAlerts)}
-                        className={cn(
-                          "relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                          discordAlerts ? "bg-cyan-500" : "bg-slate-900 border-slate-800"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-slate-955 shadow ring-0 transition duration-200 ease-in-out mt-[2px]",
-                            discordAlerts ? "translate-x-3.5" : "translate-x-0.5"
-                          )}
-                        />
-                      </button>
+                      {slackAlerts && (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="https://hooks.slack.com/services/..."
+                            value={slackWebhook}
+                            onChange={(e) => setSlackWebhook(e.target.value)}
+                            className="block w-full px-3.5 py-2.5 bg-slate-955 border border-slate-805 rounded-xl text-xs text-slate-202 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleTestSlack}
+                            disabled={slackTesting}
+                            className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer whitespace-nowrap"
+                          >
+                            {slackTesting ? "Testing..." : "Test Link"}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {discordAlerts && (
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="https://discord.com/api/webhooks/..."
-                          value={discordWebhook}
-                          onChange={(e) => setDiscordWebhook(e.target.value)}
-                          className="block w-full px-3.5 py-2.5 bg-slate-955 border border-slate-805 rounded-xl text-xs text-slate-202 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
-                        />
+
+                    {/* Discord */}
+                    <div className="p-4 border border-slate-855 bg-slate-955/25 rounded-xl space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="block font-bold text-slate-200 uppercase tracking-widest text-xs">Discord Webhook Channel</span>
                         <button
-                          onClick={handleTestDiscord}
-                          disabled={discordTesting}
-                          className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer whitespace-nowrap"
+                          type="button"
+                          onClick={() => setDiscordAlerts(!discordAlerts)}
+                          className={cn(
+                            "relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                            discordAlerts ? "bg-cyan-500" : "bg-slate-900 border-slate-800"
+                          )}
                         >
-                          {discordTesting ? "Testing..." : "Test Link"}
+                          <span
+                            className={cn(
+                              "pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-slate-955 shadow ring-0 transition duration-200 ease-in-out mt-[2px]",
+                              discordAlerts ? "translate-x-3.5" : "translate-x-0.5"
+                            )}
+                          />
                         </button>
                       </div>
-                    )}
+                      {discordAlerts && (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="https://discord.com/api/webhooks/..."
+                            value={discordWebhook}
+                            onChange={(e) => setDiscordWebhook(e.target.value)}
+                            className="block w-full px-3.5 py-2.5 bg-slate-955 border border-slate-805 rounded-xl text-xs text-slate-202 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleTestDiscord}
+                            disabled={discordTesting}
+                            className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer whitespace-nowrap"
+                          >
+                            {discordTesting ? "Testing..." : "Test Link"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                {/* Form Actions */}
+                <div className="flex justify-end pt-4 border-t border-slate-900">
+                  <button
+                    type="submit"
+                    disabled={alertsSaving}
+                    className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {alertsSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    Save Preferences
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 
