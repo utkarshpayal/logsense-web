@@ -63,9 +63,9 @@ export default function Sidebar({ closeMobileMenu }: SidebarProps) {
   };
 
   return (
-    <div className="flex flex-col h-full min-h-screen border-r border-slate-800/80 bg-background/50 relative overflow-hidden">
+    <div className="flex flex-col h-full min-h-screen border-r border-slate-900 bg-slate-950/80 backdrop-blur-md relative overflow-hidden">
       {/* Brand Header */}
-      <div className="flex items-center gap-3 h-16 px-6 border-b border-slate-800/80 relative z-10">
+      <div className="flex items-center gap-3 h-16 px-6 border-b border-slate-900 relative z-10">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-650">
           <Cpu className="w-4.5 h-4.5 text-slate-900" />
         </div>
@@ -170,7 +170,7 @@ export default function Sidebar({ closeMobileMenu }: SidebarProps) {
       </nav>
 
       {/* User Section / Footer */}
-      <div className="p-4 border-t border-slate-800/80 bg-background/50 relative z-10">
+      <div className="p-4 border-t border-slate-900 bg-transparent relative z-10">
         <button
           onClick={() => {
             logout();
