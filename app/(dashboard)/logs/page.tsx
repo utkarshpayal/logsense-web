@@ -13,6 +13,7 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Loader2,
   FolderOpen,
   Info,
@@ -121,7 +122,7 @@ export default function LogsPage() {
   const selectedLog = logDetailsResponse?.data;
 
   // Delete Mutation
-  const deleteMutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: logsApi.deleteLog,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["logs"] });
@@ -134,6 +135,8 @@ export default function LogsPage() {
       setLogToDeleteId(null);
     },
   });
+
+  const deleteMutation = createMutation;
 
   const handleDeleteLog = (id: string) => {
     setLogToDeleteId(id);
@@ -217,10 +220,10 @@ export default function LogsPage() {
   // Guard: No projects exist
   if (projects.length === 0) {
     return (
-      <div className="cyber-panel rounded-2xl border border-slate-800 p-12 text-center max-w-xl mx-auto mt-8 relative overflow-hidden font-mono">
-        <FolderOpen className="h-10 w-10 text-slate-550 mx-auto mb-4" />
+      <div className="border border-slate-800 bg-slate-955/20 rounded-2xl p-12 text-center max-w-xl mx-auto mt-8 relative overflow-hidden font-mono">
+        <FolderOpen className="h-10 w-10 text-slate-400 mx-auto mb-4" />
         <h3 className="text-xs font-bold text-white uppercase tracking-widest">No active projects</h3>
-        <p className="text-xs text-slate-500 mt-2 uppercase tracking-wider">
+        <p className="text-xs text-slate-400 mt-2 uppercase tracking-wider">
           You must create a project workspace before you can ingest or view logs.
         </p>
       </div>
@@ -230,10 +233,10 @@ export default function LogsPage() {
   // Guard: No project selected
   if (!selectedProjectId) {
     return (
-      <div className="cyber-panel rounded-2xl border border-slate-800 p-12 text-center max-w-xl mx-auto mt-8 relative overflow-hidden font-mono">
-        <Info className="h-10 w-10 text-cyan-405 mx-auto mb-4" />
+      <div className="border border-slate-800 bg-slate-955/20 rounded-2xl p-12 text-center max-w-xl mx-auto mt-8 relative overflow-hidden font-mono">
+        <Info className="h-10 w-10 text-cyan-400 mx-auto mb-4" />
         <h3 className="text-xs font-bold text-white uppercase tracking-widest">Select a project</h3>
-        <p className="text-xs text-slate-500 mt-2 uppercase tracking-wider">
+        <p className="text-xs text-slate-400 mt-2 uppercase tracking-wider">
           Please select a project from the top navbar project switcher to scope the Logs Explorer feed.
         </p>
       </div>
@@ -244,11 +247,11 @@ export default function LogsPage() {
     <div className="space-y-6 relative text-xs">
 
       {/* Search and Filters Bar */}
-      <div className="cyber-panel rounded-2xl border border-slate-800 p-4 sm:p-5 flex flex-col gap-4 relative">
-        <div className="flex flex-col md:flex-row gap-3">
+      <div className="flex flex-col gap-4 py-4 border-b border-slate-900 relative">
+        <div className="flex flex-col lg:flex-row gap-3">
           {/* Search Message */}
           <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-550">
+            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
               <Search className="h-4 w-4" />
             </span>
             <input
@@ -256,60 +259,71 @@ export default function LogsPage() {
               placeholder="Search log messages, trace IDs, user_ids..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+              className="block w-full pl-10 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-350 cursor-pointer"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
 
-          {/* Service Filter */}
-          <div className="w-full md:w-44">
-            <select
-              value={service}
-              onChange={(e) => setService(e.target.value)}
-              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/10 transition-all font-sans appearance-none cursor-pointer"
-            >
-              <option value="">All Services</option>
-              {availableServices.map((s) => (
-                <option key={s.service} value={s.service}>{s.service}</option>
-              ))}
-            </select>
-          </div>
+          <div className="flex flex-wrap sm:flex-nowrap gap-3">
+            {/* Service Filter */}
+            <div className="relative w-full sm:w-44">
+              <select
+                value={service}
+                onChange={(e) => setService(e.target.value)}
+                className="block w-full pl-3.5 pr-8 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-sans appearance-none cursor-pointer"
+              >
+                <option value="">All Services</option>
+                {availableServices.map((s) => (
+                  <option key={s.service} value={s.service}>{s.service}</option>
+                ))}
+              </select>
+              <span className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500">
+                <ChevronDown className="h-3.5 w-3.5" />
+              </span>
+            </div>
 
-          {/* Environment Filter */}
-          <div className="w-full md:w-36">
-            <select
-              value={environment}
-              onChange={(e) => setEnvironment(e.target.value)}
-              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/10 transition-all font-sans appearance-none cursor-pointer"
-            >
-              <option value="">All Envs</option>
-              <option value="development">Development</option>
-              <option value="staging">Staging</option>
-              <option value="production">Production</option>
-            </select>
-          </div>
+            {/* Environment Filter */}
+            <div className="relative w-full sm:w-36">
+              <select
+                value={environment}
+                onChange={(e) => setEnvironment(e.target.value)}
+                className="block w-full pl-3.5 pr-8 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-sans appearance-none cursor-pointer"
+              >
+                <option value="">All Envs</option>
+                <option value="development">Development</option>
+                <option value="staging">Staging</option>
+                <option value="production">Production</option>
+              </select>
+              <span className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500">
+                <ChevronDown className="h-3.5 w-3.5" />
+              </span>
+            </div>
 
-          {/* Time Range Filter */}
-          <div className="w-full md:w-36">
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="block w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/10 transition-all cursor-pointer font-sans appearance-none"
-            >
-              <option value="15m">Last 15m</option>
-              <option value="1h">Last 1h</option>
-              <option value="24h">Last 24h</option>
-              <option value="7d">Last 7d</option>
-              <option value="30d">Last 30d</option>
-              <option value="all">All Time</option>
-            </select>
+            {/* Time Range Filter */}
+            <div className="relative w-full sm:w-36">
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="block w-full pl-3.5 pr-8 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all cursor-pointer font-sans appearance-none"
+              >
+                <option value="15m">Last 15m</option>
+                <option value="1h">Last 1h</option>
+                <option value="24h">Last 24h</option>
+                <option value="7d">Last 7d</option>
+                <option value="30d">Last 30d</option>
+                <option value="all">All Time</option>
+              </select>
+              <span className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500">
+                <ChevronDown className="h-3.5 w-3.5" />
+              </span>
+            </div>
           </div>
         </div>
 
@@ -317,24 +331,24 @@ export default function LogsPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-slate-900 pt-4 gap-4">
           <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
             {/* Level selection */}
-            <div className="flex items-center gap-1.5 bg-slate-955 p-1.5 border border-slate-800 rounded-xl overflow-x-auto w-full sm:w-auto">
+            <div className="flex items-center gap-1 bg-slate-950 p-1 border border-slate-800 rounded-lg overflow-x-auto w-full sm:w-auto">
               {["all", "debug", "info", "warn", "error"].map((lvl) => (
                 <button
                   key={lvl}
                   onClick={() => setLevel(lvl)}
                   className={cn(
-                    "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer",
+                    "px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer border",
                     level === lvl
                       ? lvl === "error"
-                        ? "bg-rose-500/15 text-rose-455 border border-rose-500/25"
+                        ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
                         : lvl === "warn"
-                        ? "bg-amber-500/15 text-amber-450 border border-amber-500/25"
+                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
                         : lvl === "info"
-                        ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/25"
+                        ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
                         : lvl === "debug"
-                        ? "bg-slate-900 text-slate-300 border border-slate-800"
-                        : "bg-cyan-500 text-slate-950"
-                      : "text-slate-500 hover:text-slate-300"
+                        ? "bg-slate-850 text-slate-300 border-slate-700"
+                        : "bg-slate-800 text-slate-200 border-slate-700"
+                      : "bg-transparent text-slate-400 border-transparent hover:text-slate-200"
                   )}
                 >
                   {lvl}
@@ -343,7 +357,7 @@ export default function LogsPage() {
             </div>
 
             {/* Category selection */}
-            <div className="flex items-center gap-1.5 bg-slate-955 p-1.5 border border-slate-800 rounded-xl overflow-x-auto w-full sm:w-auto">
+            <div className="flex items-center gap-1 bg-slate-950 p-1 border border-slate-800 rounded-lg overflow-x-auto w-full sm:w-auto">
               {[
                 { id: "all", label: "All Types" },
                 { id: "database", label: "DB Logs" },
@@ -354,10 +368,10 @@ export default function LogsPage() {
                   key={cat.id}
                   onClick={() => setCategory(cat.id)}
                   className={cn(
-                    "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer",
+                    "px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap cursor-pointer border",
                     category === cat.id
-                      ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "bg-slate-800 text-slate-200 border-slate-700"
+                      : "bg-transparent text-slate-400 border-transparent hover:text-slate-200"
                   )}
                 >
                   {cat.label}
@@ -376,9 +390,14 @@ export default function LogsPage() {
                   onChange={(e) => setAutoRefresh(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-slate-850 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-550 after:border-slate-500 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500 peer-checked:after:bg-slate-950" />
+                <div className="relative w-9 h-5 bg-zinc-800 border border-zinc-700 rounded-full transition-colors peer-checked:bg-cyan-500">
+                  <div className={cn(
+                    "absolute top-[2px] left-[2px] h-3.5 w-3.5 rounded-full transition-all duration-200 shadow ring-0",
+                    autoRefresh ? "translate-x-4 bg-zinc-950" : "translate-x-0 bg-zinc-400"
+                  )} />
+                </div>
               </label>
-              <span className="text-xs text-slate-500 font-bold uppercase tracking-widest flex items-center gap-1.5 select-none">
+              <span className="text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5 select-none">
                 <Clock className="h-3.5 w-3.5" />
                 Live Tail
               </span>
@@ -386,7 +405,7 @@ export default function LogsPage() {
 
             <button
               onClick={() => refetch()}
-              className="flex items-center justify-center p-2 rounded-xl border border-slate-800 bg-slate-950/40 text-slate-500 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer"
+              className="flex items-center justify-center p-2 rounded-xl border border-slate-800 bg-slate-950/40 text-slate-400 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer"
               disabled={isFetching}
               title="Refresh"
             >
@@ -400,7 +419,7 @@ export default function LogsPage() {
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium transition-colors cursor-pointer",
                   showExportMenu
-                    ? "border-primary/40 bg-primary/10 text-primary"
+                    ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-400"
                     : "border-slate-800 bg-slate-950/40 text-slate-400 hover:text-white hover:bg-slate-900"
                 )}
                 title="Export logs"
@@ -489,21 +508,21 @@ export default function LogsPage() {
       )}
 
       {/* Main Viewport: Grid/Flex with inspector drawer */}
-      <div className="flex flex-col lg:flex-row gap-6 items-start relative z-10">
+      <div className="flex flex-col lg:flex-row gap-6 items-stretch relative z-10">
         {/* Logs Feed List */}
-        <div className="flex-1 w-full cyber-panel rounded-2xl border border-slate-800 overflow-hidden">
+        <div className="flex-1 w-full border border-slate-900 bg-slate-950/20 rounded-2xl overflow-hidden flex flex-col h-[calc(100vh-250px)]">
           {isLoading ? (
             <div className="flex h-96 items-center justify-center">
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
-                <span className="text-xs text-slate-550 uppercase tracking-widest">Scanning clickhouse index...</span>
+                <span className="text-xs text-slate-400 uppercase tracking-widest">Scanning clickhouse index...</span>
               </div>
             </div>
           ) : logs.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-96 p-8 text-center">
               <Terminal className="h-10 w-10 text-slate-700 mb-4" />
               <h4 className="text-xs font-bold text-white uppercase tracking-widest">No Logs Found</h4>
-              <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed uppercase tracking-wider">
+              <p className="text-xs text-slate-400 mt-2 max-w-sm mx-auto leading-relaxed uppercase tracking-wider">
                 Zero events matched filter criteria. Ensure SDK credentials are dispatching data packages correctly.
               </p>
             </div>
@@ -513,7 +532,7 @@ export default function LogsPage() {
                 {/* Table of logs */}
                 <div 
                   ref={scrollContainerRef}
-                  className="flex-1 w-full pr-4 overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)] custom-scrollbar"
+                  className="flex-grow w-full overflow-x-auto overflow-y-auto custom-scrollbar"
                 >
                   <table className="w-full text-left border-collapse text-xs">
                   <thead>
@@ -580,7 +599,7 @@ export default function LogsPage() {
                                         "inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] border font-bold uppercase tracking-wider",
                                         isErrorStatus ? "bg-rose-500/10 text-rose-400 border-rose-500/20" : "bg-slate-900 border-slate-700 text-slate-400"
                                       )}>
-                                        <span className="text-slate-500 mr-1">{key}:</span> {val}
+                                        <span className="text-slate-400 mr-1">{key}:</span> {val}
                                       </span>
                                     );
                                   }
@@ -589,34 +608,18 @@ export default function LogsPage() {
                               </div>
                             )}
                           </td>
-                          <td className="p-3 whitespace-nowrap text-slate-500 uppercase tracking-wider">{log.environment}</td>
+                          <td className="p-3 whitespace-nowrap text-slate-400 uppercase tracking-wider">{log.environment}</td>
                         </tr>
                       );
                     })}
                   </tbody>
                 </table>
               </div>
-
-              {/* Minimap Overlay */}
-              <LogMinimap 
-                logs={logs} 
-                onLogClick={(id) => {
-                  setSelectedLogId(id);
-                  const el = document.getElementById(`log-row-${id}`);
-                  if (el && scrollContainerRef.current) {
-                    const container = scrollContainerRef.current;
-                    const topPos = el.offsetTop - container.offsetTop;
-                    container.scrollTo({ top: topPos - 40, behavior: 'smooth' });
-                  }
-                }} 
-                selectedLogId={selectedLogId} 
-                containerRef={scrollContainerRef} 
-              />
               </div>
 
               {/* Pagination controls */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between p-4 bg-slate-955/40 text-xs text-slate-500 font-bold uppercase tracking-widest">
+                <div className="flex items-center justify-between p-4 bg-slate-950/40 text-xs text-slate-400 font-bold uppercase tracking-widest border-t border-slate-900">
                   <span>
                     Records: {(page - 1) * limit + 1}-{Math.min(page * limit, totalLogs)} of {totalLogs}
                   </span>
@@ -624,7 +627,7 @@ export default function LogsPage() {
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className="p-1.5 rounded-lg border border-slate-855 hover:bg-slate-950 text-slate-550 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                      className="p-1.5 rounded-lg border border-slate-800 hover:bg-slate-950 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
@@ -634,7 +637,7 @@ export default function LogsPage() {
                     <button
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className="p-1.5 rounded-lg border border-slate-855 hover:bg-slate-950 text-slate-550 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                      className="p-1.5 rounded-lg border border-slate-800 hover:bg-slate-950 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </button>
@@ -647,9 +650,9 @@ export default function LogsPage() {
 
         {/* Sidebar Inspector Drawer */}
         {selectedLogId && (
-          <div className="w-full lg:w-[420px] cyber-panel rounded-2xl border border-slate-800 divide-y divide-slate-900 shrink-0 scale-in relative overflow-hidden flex flex-col">
+          <div className="w-full lg:w-[420px] bg-slate-950/20 border border-slate-900 rounded-2xl divide-y divide-slate-900 shrink-0 scale-in relative overflow-hidden flex flex-col h-[calc(100vh-250px)]">
             {/* Drawer Header with tabs */}
-            <div className="p-4 bg-slate-955 flex flex-col gap-3">
+            <div className="p-4 bg-slate-950 flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
                   <Terminal className="h-4.5 w-4.5 text-cyan-400" />
@@ -667,8 +670,10 @@ export default function LogsPage() {
                 <button
                   onClick={() => setInspectorTab("details")}
                   className={cn(
-                    "flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all cursor-pointer",
-                    inspectorTab === "details" ? "bg-primary text-white shadow" : "text-muted-foreground hover:text-foreground"
+                    "flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all cursor-pointer border",
+                    inspectorTab === "details"
+                      ? "bg-slate-800 text-slate-100 border-slate-700 shadow-sm"
+                      : "bg-transparent text-slate-400 border-transparent hover:text-slate-200"
                   )}
                 >
                   Details
@@ -676,8 +681,10 @@ export default function LogsPage() {
                 <button
                   onClick={() => setInspectorTab("trace")}
                   className={cn(
-                    "flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all cursor-pointer",
-                    inspectorTab === "trace" ? "bg-primary text-white shadow" : "text-muted-foreground hover:text-foreground"
+                    "flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all cursor-pointer border",
+                    inspectorTab === "trace"
+                      ? "bg-slate-800 text-slate-100 border-slate-700 shadow-sm"
+                      : "bg-transparent text-slate-400 border-transparent hover:text-slate-200"
                   )}
                 >
                   ⚡ Trace Timeline
@@ -687,10 +694,10 @@ export default function LogsPage() {
 
             {detailsLoading ? (
               <div className="flex h-64 items-center justify-center">
-                <Loader2 className="h-5 w-5 animate-spin text-cyan-405" />
+                <Loader2 className="h-5 w-5 animate-spin text-cyan-400" />
               </div>
             ) : selectedLog ? (
-              <div className="overflow-y-auto max-h-[calc(100vh-320px)] custom-scrollbar">
+              <div className="flex-1 overflow-y-auto custom-scrollbar">
                 {/* TRACE TIMELINE TAB */}
                 {inspectorTab === "trace" ? (
                   <div className="p-4">
@@ -800,7 +807,7 @@ export default function LogsPage() {
                 )}
               </div>
             ) : (
-              <div className="flex h-48 items-center justify-center text-slate-550 italic uppercase text-xs tracking-widest">
+              <div className="flex h-48 items-center justify-center text-slate-400 italic uppercase text-xs tracking-widest">
                 Failed to parse details.
               </div>
             )}

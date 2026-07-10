@@ -21,8 +21,8 @@ const LeafletStyles = () => (
       background: transparent !important;
     }
     .leaflet-popup-tip {
-      background: #0f172a !important;
-      border: 1px solid #1e293b !important;
+      background: #020617 !important;
+      border: 1px solid #0f172a !important;
       box-shadow: none !important;
     }
     .leaflet-popup-close-button {

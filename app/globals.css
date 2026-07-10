@@ -25,6 +25,22 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-border: var(--border);
+  
+  /* Custom shades to resolve styling fallbacks */
+  --color-slate-850: #182235;
+  --color-slate-450: #7c8ba2;
+  --color-slate-550: #536277;
+  --color-zinc-250: #dcdce0;
+  --color-zinc-350: #bbbbc2;
+  --color-indigo-650: #5a62f6;
+  
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", monospace;
 }
@@ -43,13 +59,16 @@ body {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #3f3f46;
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #52525b;
 }
@@ -81,12 +100,14 @@ body {
 
 /* Subtle Data Grid Background (Replaces Heavy Dotted Grid) */
 .dotted-tech {
-  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1.2px, transparent 1.2px);
   background-size: 24px 24px;
 }
 
 /* Clean Form Elements */
-input, textarea, select {
+input,
+textarea,
+select {
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -96,8 +117,13 @@ input, textarea, select {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .scale-in {
@@ -109,8 +135,26 @@ input, textarea, select {
     opacity: 0;
     transform: scale(0.98) translateY(4px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+/* Premium Gradient Border Glow */
+.cyber-panel-glow {
+  position: relative;
+}
+.cyber-panel-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem; /* matches rounded-2xl */
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.4) 0%, rgba(99, 102, 241, 0.15) 50%, rgba(255, 255, 255, 0.05) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }

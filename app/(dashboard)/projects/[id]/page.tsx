@@ -194,20 +194,20 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
       {/* Breadcrumb back */}
       <button
         onClick={() => router.push("/projects")}
-        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-350 transition-colors cursor-pointer"
+        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Node List
       </button>
 
       {/* Workspace Header Summary */}
-      <div className="flex items-center gap-4 bg-slate-950/40 p-5 rounded-2xl border border-slate-800/80">
+      <div className="flex items-center gap-4 py-4 border-b border-slate-900">
         <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/5 border border-cyan-500/25 text-cyan-450">
           <Cpu className="h-5 w-5 animate-pulse" />
         </div>
         <div>
           <h2 className="text-xs font-extrabold text-white tracking-widest uppercase">{project.name}</h2>
-          <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest">UUID // {project.id}</p>
+          <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">UUID // {project.id}</p>
         </div>
       </div>
 
@@ -247,7 +247,7 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
               <BookOpen className="h-4.5 w-4.5 text-cyan-400" />
               SDK AUTO-INSTRUMENTATION SETUP
             </h3>
-            <p className="text-[10px] text-slate-500 leading-relaxed max-w-2xl font-sans normal-case">
+            <p className="text-[10px] text-slate-400 leading-relaxed max-w-2xl font-sans normal-case">
               Integrate LogSense into your service container. The SDK will automatically trace execution times, query latency thresholds, and HTTP statuses, broadcasting telemetry asynchronously.
             </p>
           </div>
@@ -291,7 +291,7 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
                 Copy Code
               </button>
             </div>
-            <pre className="p-5 overflow-x-auto font-mono text-[10px] text-slate-350 leading-relaxed whitespace-pre select-text">
+            <pre className="p-5 overflow-x-auto font-mono text-[10px] text-slate-200 leading-relaxed whitespace-pre select-text">
               <code>{getCodeSnippet()}</code>
             </pre>
           </div>
@@ -300,7 +300,7 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
         <div className="max-w-xl space-y-6">
           <div className="flex flex-col gap-1.5">
             <h3 className="text-xs font-bold text-white uppercase tracking-widest">Update Node Properties</h3>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider">
               Modify display metadata and logging attributes for this node.
             </p>
           </div>
@@ -312,7 +312,7 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
               </label>
               <input
                 type="text"
-                className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-650 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                 {...register("name")}
                 disabled={updateMutation.isPending}
               />
@@ -327,7 +327,7 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
               </label>
               <textarea
                 rows={4}
-                className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-202 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all resize-none font-mono"
+                className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-650 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all resize-none font-mono"
                 {...register("description")}
                 disabled={updateMutation.isPending}
               />
@@ -343,7 +343,7 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
               <input
                 type="text"
                 placeholder="https://discord.com/api/webhooks/..."
-                className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-202 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-650 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                 {...register("discord_webhook_url")}
                 disabled={updateMutation.isPending}
               />
@@ -356,7 +356,7 @@ curl -X POST "${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/logs
               <button
                 type="submit"
                 disabled={!isDirty || updateMutation.isPending}
-                className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-955 border border-slate-800 hover:border-cyan-500/30 disabled:border-slate-900 disabled:text-slate-600 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
+                className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 disabled:from-cyan-500/50 disabled:to-blue-500/50 disabled:text-slate-400 text-slate-955 text-xs font-extrabold uppercase tracking-widest transition-all shadow-[0_0_15px_-4px_rgba(6,182,212,0.25)] active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed"
               >
                 {updateMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Save Settings

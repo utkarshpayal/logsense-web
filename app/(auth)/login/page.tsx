@@ -98,19 +98,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="cyber-panel p-8 sm:p-10 rounded-2xl border border-slate-800 shadow-2xl relative overflow-hidden group font-mono">
+    <div className="cyber-panel cyber-panel-glow p-8 sm:p-10 rounded-2xl border border-slate-800 shadow-2xl relative overflow-hidden group font-mono w-full">
       {/* Glow corner accent */}
       <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-cyan-500/5 blur-[50px] pointer-events-none" />
 
       {/* Header */}
-      <div className="flex flex-col items-center mb-8 relative z-10">
-        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-650 shadow-lg shadow-cyan-500/20 mb-4 animate-spin" style={{ animationDuration: "12s" }}>
-          <Cpu className="w-6 h-6 text-slate-900" />
+      <div className="flex flex-col items-center mb-8 relative z-10">      
+
+        {/* Logo emblem */}
+        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-950/80 border border-slate-800/80 shadow-[0_0_20px_rgba(6,182,212,0.05)] mb-4 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-indigo-500/10 opacity-60" />
+          <Cpu className="w-5 h-5 text-cyan-400 group-hover:rotate-45 transition-transform duration-500" />
         </div>
-        <h2 className="text-sm font-extrabold text-white tracking-widest uppercase">
-          {isLoginView ? "SYSTEM ACCESS" : "GENERATE CLIENT CREDENTIALS"}
+
+        <h2 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 tracking-widest uppercase text-center">
+          {isLoginView ? "SYSTEM ACCESS" : "GENERATE CLIENT"}
         </h2>
-        <p className="text-xs text-slate-500 mt-2 uppercase tracking-widest leading-relaxed text-center">
+        <p className="text-[10px] text-slate-500 mt-2 uppercase tracking-widest leading-relaxed text-center max-w-[280px]">
           {isLoginView
             ? "Provide authorization keys to access dashboard telemetry"
             : "Register new developer credentials on LogSense stack"}
@@ -122,17 +126,17 @@ export default function LoginPage() {
         <form onSubmit={handleLoginSubmit(onLoginSubmit)} className="space-y-5 relative z-10 text-xs">
           {/* Email */}
           <div className="space-y-1.5">
-            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+            <label className="block font-bold text-slate-300 uppercase tracking-widest text-[9px]">
               Email Endpoint
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-slate-650">
+              <span className="absolute left-3.5 text-slate-400">
                 <Mail className="h-3.5 w-3.5" />
               </span>
               <input
                 type="email"
                 placeholder="developer@logsense.com"
-                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/50 border border-slate-800/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 focus:shadow-[0_0_12px_rgba(6,182,212,0.08)] transition-all font-mono"
                 {...registerLogin("email")}
                 disabled={isSubmitting}
               />
@@ -144,17 +148,17 @@ export default function LoginPage() {
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+            <label className="block font-bold text-slate-300 uppercase tracking-widest text-[9px]">
               Security Key
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-slate-655">
+              <span className="absolute left-3.5 text-slate-400">
                 <Lock className="h-3.5 w-3.5" />
               </span>
               <input
                 type="password"
                 placeholder="••••••••"
-                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/50 border border-slate-800/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 focus:shadow-[0_0_12px_rgba(6,182,212,0.08)] transition-all font-mono"
                 {...registerLogin("password")}
                 disabled={isSubmitting}
               />
@@ -168,7 +172,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-900 font-bold uppercase tracking-widest text-xs transition-all shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
+            className="w-full flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-slate-950 font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
           >
             {isSubmitting ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -184,17 +188,17 @@ export default function LoginPage() {
         <form onSubmit={handleRegisterSubmit(onRegisterSubmit)} className="space-y-5 relative z-10 text-xs">
           {/* Full Name */}
           <div className="space-y-1.5">
-            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+            <label className="block font-bold text-slate-300 uppercase tracking-widest text-[9px]">
               Operator Identifier
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-slate-655">
+              <span className="absolute left-3.5 text-slate-400">
                 <User className="h-3.5 w-3.5" />
               </span>
               <input
                 type="text"
                 placeholder="Alex Mercer"
-                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/50 border border-slate-800/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 focus:shadow-[0_0_12px_rgba(6,182,212,0.08)] transition-all font-mono"
                 {...registerRegister("name")}
                 disabled={isSubmitting}
               />
@@ -206,17 +210,17 @@ export default function LoginPage() {
 
           {/* Email */}
           <div className="space-y-1.5">
-            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+            <label className="block font-bold text-slate-300 uppercase tracking-widest text-[9px]">
               Email Address
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-slate-655">
+              <span className="absolute left-3.5 text-slate-400">
                 <Mail className="h-3.5 w-3.5" />
               </span>
               <input
                 type="email"
                 placeholder="developer@logsense.com"
-                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/50 border border-slate-800/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 focus:shadow-[0_0_12px_rgba(6,182,212,0.08)] transition-all font-mono"
                 {...registerRegister("email")}
                 disabled={isSubmitting}
               />
@@ -228,17 +232,17 @@ export default function LoginPage() {
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+            <label className="block font-bold text-slate-300 uppercase tracking-widest text-[9px]">
               Security Key
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-slate-655">
+              <span className="absolute left-3.5 text-slate-400">
                 <Lock className="h-3.5 w-3.5" />
               </span>
               <input
                 type="password"
                 placeholder="At least 8 characters"
-                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/50 border border-slate-800/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 focus:shadow-[0_0_12px_rgba(6,182,212,0.08)] transition-all font-mono"
                 {...registerRegister("password")}
                 disabled={isSubmitting}
               />
@@ -252,7 +256,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-900 font-bold uppercase tracking-widest text-xs transition-all shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
+            className="w-full flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-slate-950 font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
           >
             {isSubmitting ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -267,7 +271,7 @@ export default function LoginPage() {
       )}
 
       {/* Switch link */}
-      <div className="mt-6 text-center relative z-10">
+      <div className="pt-5 border-t border-slate-900/60 mt-6 text-center relative z-10 w-full">
         <button
           onClick={toggleView}
           disabled={isSubmitting}

@@ -115,13 +115,13 @@ export default function ProjectsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
           <h2 className="text-base font-extrabold text-white tracking-widest uppercase">Workspace Nodes</h2>
-          <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider">
+          <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider">
             Register and partition system scopes for your applications.
           </p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-900 text-xs font-bold uppercase tracking-widest transition-all shadow-md cursor-pointer"
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 text-xs font-extrabold uppercase tracking-widest transition-all shadow-md cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Add Node
@@ -139,12 +139,12 @@ export default function ProjectsPage() {
             <Cpu className="h-6 w-6 animate-pulse" />
           </div>
           <h3 className="text-xs font-bold text-white uppercase tracking-widest">No nodes registered</h3>
-          <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed uppercase tracking-wider">
+          <p className="text-xs text-slate-400 mt-2 max-w-sm mx-auto leading-relaxed uppercase tracking-wider">
             A node acts as an isolated project grouping your SDK tokens and Clickhouse event tables.
           </p>
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-805 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all mx-auto mt-6 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 text-xs font-extrabold uppercase tracking-widest transition-all mx-auto mt-6 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             Initialize First Node
@@ -204,13 +204,13 @@ export default function ProjectsPage() {
                   <h4 className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors truncate uppercase tracking-widest">
                     {project.name}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-2 line-clamp-2 h-8 min-h-[32px] leading-relaxed font-sans normal-case">
+                  <p className="text-xs text-slate-400 mt-2 line-clamp-2 h-8 min-h-[32px] leading-relaxed font-sans normal-case">
                     {project.description || "No description provided."}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between border-t border-slate-900 pt-4 mt-6">
-                  <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                  <span className="flex items-center gap-1.5 text-[10px] text-slate-400">
                     <Calendar className="h-3.5 w-3.5" />
                     {new Date(project.created_at).toLocaleDateString()}
                   </span>
@@ -242,7 +242,7 @@ export default function ProjectsPage() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="text-xs text-slate-500 mb-6 leading-relaxed uppercase tracking-wider">
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed uppercase tracking-wider">
               Define the workspace nodes to begin ingesting telemetry.
             </p>
 
@@ -254,7 +254,7 @@ export default function ProjectsPage() {
                 <input
                   type="text"
                   placeholder="e.g. Authentitas Service"
-                  className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-202 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                  className="block w-full px-3.5 py-2.5 bg-slate-950/50 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                   {...register("name")}
                   disabled={createMutation.isPending}
                 />
@@ -265,12 +265,12 @@ export default function ProjectsPage() {
 
               <div className="space-y-1.5">
                 <label className="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">
-                  Description <span className="text-slate-655">(Optional)</span>
+                  Description <span className="text-slate-550">(Optional)</span>
                 </label>
                 <textarea
                   placeholder="Workspace description / context..."
                   rows={3}
-                  className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-202 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all resize-none font-mono"
+                  className="block w-full px-3.5 py-2.5 bg-slate-950/50 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all resize-none font-mono"
                   {...register("description")}
                   disabled={createMutation.isPending}
                 />
@@ -288,19 +288,19 @@ export default function ProjectsPage() {
                     reset();
                     setModalOpen(false);
                   }}
-                  className="px-4 py-2.5 rounded-xl border border-slate-850 hover:bg-slate-950 text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl border border-slate-800 hover:bg-slate-950 text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer"
                   disabled={createMutation.isPending}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-955 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
                   disabled={createMutation.isPending}
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 text-xs font-extrabold uppercase tracking-widest transition-all shadow-[0_0_15px_-4px_rgba(6,182,212,0.25)] cursor-pointer disabled:cursor-not-allowed"
                 >
                   {createMutation.isPending ? (
                     <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-950" />
                       <span>Processing...</span>
                     </>
                   ) : (

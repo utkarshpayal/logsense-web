@@ -180,7 +180,7 @@ export default function DashboardPage() {
         </div>
         <button
           onClick={() => router.push("/logs")}
-          className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700 px-3.5 py-2 rounded-xl transition-all cursor-pointer self-start sm:self-center"
+          className="flex items-center gap-1.5 text-sm text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 px-3.5 py-2 rounded-xl transition-all cursor-pointer self-start sm:self-center"
         >
           View Logs
           <ArrowUpRight className="h-3.5 w-3.5" />
@@ -201,7 +201,7 @@ export default function DashboardPage() {
             {/* Total Logs */}
             <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 hover:border-slate-700/80 transition-colors">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-slate-400">Total Logs</span>
+                <span className="text-sm font-medium text-slate-400">Total Logs</span>
                 <div className="p-1.5 bg-cyan-500/10 rounded-lg">
                   <Activity className="h-4 w-4 text-cyan-400" />
                 </div>
@@ -220,7 +220,7 @@ export default function DashboardPage() {
                 : "bg-slate-900/60 border-slate-800/80 hover:border-slate-700/80"
             )}>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-slate-400">Errors</span>
+                <span className="text-sm font-medium text-slate-400">Errors</span>
                 <div className={cn("p-1.5 rounded-lg", hasErrors ? "bg-rose-500/10" : "bg-slate-800")}>
                   <AlertTriangle className={cn("h-4 w-4", hasErrors ? "text-rose-400" : "text-slate-500")} />
                 </div>
@@ -234,7 +234,7 @@ export default function DashboardPage() {
             {/* Error Rate */}
             <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 hover:border-slate-700/80 transition-colors">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-slate-400">Error Rate</span>
+                <span className="text-sm font-medium text-slate-400">Error Rate</span>
                 <div className="p-1.5 bg-amber-500/10 rounded-lg">
                   <TrendingUp className="h-4 w-4 text-amber-400" />
                 </div>
@@ -249,7 +249,7 @@ export default function DashboardPage() {
             {/* Avg Latency */}
             <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 hover:border-slate-700/80 transition-colors">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-slate-400">Avg Latency</span>
+                <span className="text-sm font-medium text-slate-400">Avg Latency</span>
                 <div className="p-1.5 bg-indigo-500/10 rounded-lg">
                   <Clock className="h-4 w-4 text-indigo-400" />
                 </div>
@@ -321,7 +321,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-44 text-slate-600 text-sm">
+                <div className="flex items-center justify-center h-44 text-slate-600 text-md">
                   No timeline data yet
                 </div>
               )}
@@ -341,9 +341,9 @@ export default function DashboardPage() {
                       ? (item.count / overview.totalLogs) * 100 : 0;
                     const color =
                       item.level === "error" ? { bar: "bg-rose-500", text: "text-rose-400", bg: "bg-rose-500/10 border-rose-500/20" } :
-                      item.level === "warn"  ? { bar: "bg-amber-500", text: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" } :
-                      item.level === "info"  ? { bar: "bg-blue-500",  text: "text-blue-400",  bg: "bg-blue-500/10 border-blue-500/20" } :
-                                               { bar: "bg-slate-500", text: "text-slate-400", bg: "bg-slate-800 border-slate-700" };
+                        item.level === "warn" ? { bar: "bg-amber-500", text: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" } :
+                          item.level === "info" ? { bar: "bg-blue-500", text: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" } :
+                            { bar: "bg-slate-500", text: "text-slate-400", bg: "bg-slate-800 border-slate-700" };
                     return (
                       <div key={item.level}>
                         <div className="flex items-center justify-between mb-1.5">
@@ -397,37 +397,39 @@ export default function DashboardPage() {
                         {marker.userId} ({marker.city})
                       </MarkerLabel>
                     </MarkerContent>
-                    <MarkerPopup className="w-72 p-0 bg-slate-900 border border-slate-850">
-                      {/* Popup Header with map theme colors */}
-                      <div className="relative h-20 bg-gradient-to-r from-cyan-950 to-slate-900 px-4 py-3 flex items-center gap-3 border-b border-slate-800/60">
-                        <div className="p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-xl">
-                          <UserCheck className="size-5 text-cyan-400" />
+                    <MarkerPopup className="w-80 p-0 bg-slate-950 border border-slate-900 shadow-2xl">
+                      {/* Popup Header with slate theme */}
+                      <div className="relative p-3.5 flex items-center gap-3 border-b border-slate-900 bg-slate-950">
+                        <div className="p-2 bg-slate-900 border border-slate-800 rounded-lg text-cyan-400">
+                          <UserCheck className="size-4.5" />
                         </div>
-                        <div>
-                          <p className="text-[10px] text-cyan-400 font-semibold tracking-wider uppercase">User Onboarding</p>
-                          <h3 className="text-sm text-white font-bold leading-none mt-1 font-mono">{marker.userId}</h3>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[9px] text-slate-500 font-extrabold tracking-widest uppercase">User Onboarding</p>
+                          <h3 className="text-xs text-white font-bold font-mono truncate mt-0.5" title={marker.userId}>
+                            {marker.userId}
+                          </h3>
                         </div>
                       </div>
 
                       {/* Popup Body */}
-                      <div className="p-4 space-y-3.5 text-xs">
+                      <div className="p-4 space-y-3.5 text-xs bg-slate-950">
                         {/* Location & IP Details */}
-                        <div className="grid grid-cols-2 gap-3.5">
+                        <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">City</span>
-                            <span className="text-slate-200 font-medium mt-0.5 block">{marker.city}</span>
+                            <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block">City</span>
+                            <span className="text-slate-300 font-bold mt-0.5 block">{marker.city}</span>
                           </div>
                           <div>
-                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Country</span>
-                            <span className="text-slate-200 font-medium mt-0.5 block">{marker.country}</span>
+                            <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block">Country</span>
+                            <span className="text-slate-300 font-bold mt-0.5 block">{marker.country}</span>
                           </div>
                           <div>
-                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">IP Address</span>
-                            <span className="text-slate-350 font-mono mt-0.5 block">{marker.ip}</span>
+                            <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block">IP Address</span>
+                            <span className="text-slate-400 font-mono mt-0.5 block truncate" title={marker.ip}>{marker.ip}</span>
                           </div>
                           <div>
-                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Current Step</span>
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mt-0.5">
+                            <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block">Status</span>
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mt-0.5">
                               {marker.step}
                             </span>
                           </div>
@@ -435,11 +437,11 @@ export default function DashboardPage() {
 
                         {/* Completed sections (if present) */}
                         {marker.metadata && Object.keys(marker.metadata).length > 0 && (
-                          <div className="pt-2.5 border-t border-slate-850">
-                            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">Metadata</span>
-                            <div className="flex flex-wrap gap-1.5 max-h-16 overflow-y-auto pr-1">
+                          <div className="pt-3 border-t border-slate-900">
+                            <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Metadata</span>
+                            <div className="flex flex-wrap gap-1.5 max-h-16 overflow-y-auto custom-scrollbar pr-1">
                               {Object.entries(marker.metadata).map(([key, val]) => (
-                                <span key={key} className="px-1.5 py-0.5 rounded text-[10px] bg-slate-950 border border-slate-800 text-slate-400 font-mono">
+                                <span key={key} className="px-1.5 py-0.5 rounded text-[9px] bg-slate-900 border border-slate-800 text-slate-400 font-mono font-medium">
                                   {key}: {Array.isArray(val) ? val.join(", ") : String(val)}
                                 </span>
                               ))}
@@ -448,9 +450,9 @@ export default function DashboardPage() {
                         )}
 
                         {/* Footer with date */}
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-850 text-[10px] text-slate-500">
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-900 text-[9px] text-slate-500 font-mono uppercase tracking-wider">
                           <span className="flex items-center gap-1">
-                            <Clock className="size-3" />
+                            <Clock className="size-3 text-slate-600" />
                             {new Date(marker.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </span>
                           <span>{new Date(marker.createdAt).toLocaleDateString()}</span>

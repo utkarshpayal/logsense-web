@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useAuth } from "../../hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { projectApi } from "../../lib/api";
@@ -46,8 +46,10 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       {/* Desktop Sidebar (Left-aligned fixed) */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-border bg-background/80 backdrop-blur-xl z-30">
-        <Sidebar />
+      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-slate-800/80 bg-background/80 backdrop-blur-xl z-30">
+        <Suspense fallback={<div className="h-full w-full bg-background" />}>
+          <Sidebar />
+        </Suspense>
       </div>
 
       {/* Mobile Sidebar overlay */}
@@ -59,7 +61,7 @@ export default function DashboardLayout({
             onClick={() => setMobileSidebarOpen(false)}
           />
           {/* Menu panel */}
-          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-card border-r border-border pt-5 pb-4">
+          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-card border-r border-slate-800/80 pt-5 pb-4">
             <div className="absolute top-0 right-0 -mr-12 pt-2">
               <button
                 type="button"
@@ -79,7 +81,9 @@ export default function DashboardLayout({
                 </svg>
               </button>
             </div>
-            <Sidebar closeMobileMenu={() => setMobileSidebarOpen(false)} />
+            <Suspense fallback={<div className="h-full w-full bg-background" />}>
+              <Sidebar closeMobileMenu={() => setMobileSidebarOpen(false)} />
+            </Suspense>
           </div>
         </div>
       )}
@@ -93,7 +97,7 @@ export default function DashboardLayout({
           onMenuClick={() => setMobileSidebarOpen(true)} 
           onChatClick={() => setChatbotOpen(!chatbotOpen)} 
         />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto fade-in">
+        <main className="flex-1 p-4 md:p-8 md:px-12 fade-in">
           {children}
         </main>
       </div>

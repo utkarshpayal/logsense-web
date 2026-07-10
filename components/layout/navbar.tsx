@@ -54,13 +54,13 @@ export default function Navbar({ onMenuClick, onChatClick }: NavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-800/80 bg-[#060913]/85 px-4 backdrop-blur-md sm:px-6 lg:px-8 font-mono">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-900 bg-slate-950/80 px-4 backdrop-blur-md sm:px-6 lg:px-8 font-mono">
       <div className="flex items-center gap-4">
         {/* Mobile menu trigger */}
         <button
           type="button"
           onClick={onMenuClick}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-850 bg-slate-900/40 text-slate-450 hover:text-white md:hidden transition-colors cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 bg-slate-900/40 text-slate-450 hover:text-white md:hidden transition-colors cursor-pointer"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -73,7 +73,7 @@ export default function Navbar({ onMenuClick, onChatClick }: NavbarProps) {
           <span className="text-[10px] text-slate-500 font-extrabold tracking-widest uppercase hidden sm:inline-block">
             Dashboard
           </span>
-          <ChevronRight className="h-4 w-4 text-slate-655 hidden sm:inline-block" />
+          <ChevronRight className="h-4 w-4 text-slate-600 hidden sm:inline-block" />
           <h1 className="text-xs font-bold text-white tracking-widest uppercase">{getPageTitle()}</h1>
         </div>
       </div>
@@ -83,11 +83,11 @@ export default function Navbar({ onMenuClick, onChatClick }: NavbarProps) {
         {selectedProjectId && (
           <button
             onClick={onChatClick}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800/80 bg-slate-950/40 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all cursor-pointer relative"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all cursor-pointer relative"
             title="Toggle AI Observability Drawer"
           >
             <Bot className="h-4.5 w-4.5" />
-            <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-cyan-455" />
+            <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-cyan-400" />
           </button>
         )}
 
@@ -96,7 +96,7 @@ export default function Navbar({ onMenuClick, onChatClick }: NavbarProps) {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-800/80 bg-slate-950/40 text-slate-350 hover:text-white hover:border-cyan-500/30 transition-all text-xs font-bold uppercase tracking-widest focus:outline-none cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-800 bg-slate-900/40 text-slate-350 hover:text-white hover:border-cyan-500/30 transition-all text-xs font-bold uppercase tracking-widest focus:outline-none cursor-pointer"
             >
               <Folder className="h-4 w-4 text-cyan-400" />
               <span className="max-w-[120px] truncate">
@@ -106,7 +106,7 @@ export default function Navbar({ onMenuClick, onChatClick }: NavbarProps) {
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2.5 w-56 origin-top-right rounded-xl border border-slate-800 bg-[#0b0e1a]/95 backdrop-blur-xl shadow-2xl p-1.5 divide-y divide-slate-800/50 scale-in">
+              <div className="absolute right-0 mt-2.5 w-56 origin-top-right rounded-lg border border-slate-800 bg-slate-950/95 backdrop-blur-xl shadow-2xl p-1.5 divide-y divide-slate-800/50 scale-in">
                 <div className="py-1">
                   <span className="block px-3 py-1.5 text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
                     Scope Project
@@ -124,9 +124,9 @@ export default function Navbar({ onMenuClick, onChatClick }: NavbarProps) {
                           }
                         }}
                         className={cn(
-                          "flex w-full items-center justify-between px-3 py-2 text-xs rounded-lg transition-colors text-left font-bold uppercase tracking-wider cursor-pointer",
+                          "flex w-full items-center justify-between px-3 py-2 text-xs rounded-md transition-colors text-left font-bold uppercase tracking-wider cursor-pointer border border-transparent",
                           isSelected
-                            ? "bg-cyan-500/5 text-cyan-400 border border-cyan-500/20"
+                            ? "bg-slate-800 text-slate-200 border-slate-700"
                             : "text-slate-400 hover:text-white hover:bg-slate-900/30"
                         )}
                       >
@@ -142,7 +142,7 @@ export default function Navbar({ onMenuClick, onChatClick }: NavbarProps) {
                       setDropdownOpen(false);
                       router.push("/projects");
                     }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg text-slate-400 hover:text-white hover:bg-slate-900/30 cursor-pointer"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-md text-slate-400 hover:text-white hover:bg-slate-900/30 cursor-pointer"
                   >
                     <Plus className="h-4 w-4 text-slate-500" />
                     Manage Projects
@@ -157,7 +157,7 @@ export default function Navbar({ onMenuClick, onChatClick }: NavbarProps) {
         {projects.length === 0 && (
           <button
             onClick={() => router.push("/projects")}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-955 text-xs font-bold uppercase tracking-widest transition-all shadow-md cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
             New Project

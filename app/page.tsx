@@ -27,7 +27,7 @@ export default function Home() {
             <Cpu className="w-4.5 h-4.5 text-slate-900 animate-spin" style={{ animationDuration: "12s" }} />
           </div>
           <span className="font-bold text-sm tracking-widest text-white uppercase flex items-center gap-1.5">
-            LogSense
+            Tri-Netra
             <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/25 uppercase tracking-widest">
               v1.0
             </span>
@@ -65,7 +65,9 @@ export default function Home() {
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.1] max-w-4xl font-mono uppercase">
-          Observability scaled with <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-magenta-400">Conversational AI</span>
+          Observability scaled with <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-500 to-pink-200">
+  Conversational AI
+</span>
         </h1>
 
         <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed font-sans">
@@ -131,7 +133,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-slate-800/80 py-8 text-center text-[10px] text-slate-500 font-mono tracking-widest uppercase">
-        © {new Date().getFullYear()} LOGSENSE SYSTEMS. TELEMETRY STACK INGESTION.
+        © {new Date().getFullYear()} TRI-NETRA SYSTEMS. TELEMETRY STACK INGESTION.
       </footer>
     </div>
   );

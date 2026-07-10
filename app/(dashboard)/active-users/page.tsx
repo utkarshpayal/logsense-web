@@ -51,7 +51,7 @@ export default function ActiveUsersMapPage() {
   const [hasSetInitialCenter, setHasSetInitialCenter] = useState(false);
 
   // Polling state
-  const [pollInterval, setPollInterval] = useState<number | false>(5000);
+  const [pollInterval, setPollInterval] = useState<number | false>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const { data: onboardingRes, isLoading: onboardingLoading, refetch, isFetching } = useQuery({
@@ -183,7 +183,7 @@ export default function ActiveUsersMapPage() {
             <span className="h-2 w-2 rounded-full bg-cyan-500 animate-pulse" />
             <span className="text-xs text-cyan-400 font-semibold uppercase tracking-wider">Active Telemetry</span>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Active Users Map</h1>
+          <h1 className="text-xl pt-2 font-bold text-white tracking-tight">Active Users Map</h1>
           <p className="text-sm text-slate-400 mt-1">
             Visualizing real-time onboarding flows and user locales for <span className="text-slate-200 font-medium">{activeProject?.name}</span>
           </p>
@@ -191,7 +191,7 @@ export default function ActiveUsersMapPage() {
 
         {/* Polling / Refresh Controls */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-850 px-2.5 py-1.5 rounded-xl text-xs">
+          <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-2.5 py-1.5 rounded-xl text-xs">
             <button
               onClick={() => setPollInterval(pollInterval ? false : 5000)}
               className={cn(
@@ -212,7 +212,7 @@ export default function ActiveUsersMapPage() {
             size="sm"
             onClick={() => refetch()}
             disabled={isFetching}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 p-2 bg-slate-950 text-slate-400"
           >
             <RefreshCw className={cn("size-3.5", isFetching && "animate-spin")} />
             Refresh
@@ -347,44 +347,46 @@ export default function ActiveUsersMapPage() {
                           {marker.userId}
                         </MarkerLabel>
                       </MarkerContent>
-                      <MarkerPopup className="w-72 p-0 bg-slate-900 border border-slate-850">
-                        {/* Popup Header */}
-                        <div className="relative h-20 bg-gradient-to-r from-cyan-950 to-slate-900 px-4 py-3 flex items-center gap-3 border-b border-slate-800/60">
-                          <div className="p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-xl">
-                            <UserCheck className="size-5 text-cyan-400" />
+                      <MarkerPopup className="w-80 p-0 bg-slate-955 border border-slate-900 shadow-2xl">
+                        {/* Popup Header with slate theme */}
+                        <div className="relative p-3.5 flex items-center gap-3 border-b border-slate-900 bg-slate-950">
+                          <div className="p-2 bg-slate-900 border border-slate-800 rounded-lg text-cyan-400">
+                            <UserCheck className="size-4.5" />
                           </div>
-                          <div>
-                            <p className="text-[10px] text-cyan-400 font-semibold tracking-wider uppercase">User Onboarding</p>
-                            <h3 className="text-sm text-white font-bold leading-none mt-1 font-mono">{marker.userId}</h3>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[9px] text-slate-500 font-extrabold tracking-widest uppercase">User Onboarding</p>
+                            <h3 className="text-xs text-white font-bold font-mono truncate mt-0.5" title={marker.userId}>
+                              {marker.userId}
+                            </h3>
                           </div>
                         </div>
 
                         {/* Popup Body */}
-                        <div className="p-4 space-y-3 text-xs">
+                        <div className="p-4 space-y-3.5 text-xs bg-slate-950">
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">City</span>
-                              <span className="text-slate-200 font-medium mt-0.5 block">{marker.city}</span>
+                              <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block">City</span>
+                              <span className="text-slate-300 font-bold mt-0.5 block">{marker.city}</span>
                             </div>
                             <div>
-                              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Country</span>
-                              <span className="text-slate-200 font-medium mt-0.5 block">{marker.country}</span>
+                              <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block">Country</span>
+                              <span className="text-slate-300 font-bold mt-0.5 block">{marker.country}</span>
                             </div>
                             <div>
-                              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">IP Address</span>
-                              <span className="text-slate-350 font-mono mt-0.5 block">{marker.ip}</span>
+                              <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block">IP Address</span>
+                              <span className="text-slate-400 font-mono mt-0.5 block truncate" title={marker.ip}>{marker.ip}</span>
                             </div>
                             <div>
-                              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Current Step</span>
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mt-0.5">
+                              <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block">Status</span>
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mt-0.5">
                                 {marker.step}
                               </span>
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between pt-2.5 border-t border-slate-850 text-[10px] text-slate-500">
+                          <div className="flex items-center justify-between pt-3 border-t border-slate-900 text-[9px] text-slate-500 font-mono uppercase tracking-wider">
                             <span className="flex items-center gap-1">
-                              <Clock className="size-3" />
+                              <Clock className="size-3 text-slate-600" />
                               {new Date(marker.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </span>
                             <span>{new Date(marker.createdAt).toLocaleDateString()}</span>
@@ -414,8 +416,8 @@ export default function ActiveUsersMapPage() {
 
             {/* Interactive Users List & Selection Details */}
             <div className="flex-1 bg-slate-900/30 border border-slate-800/80 rounded-2xl flex flex-col overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-850 bg-slate-900/50 flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-350">Onboarding Session Logs</span>
+              <div className="px-4 py-3 border-b border-slate-700 bg-slate-900/50 flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-350">Onboarding Session Logs</span>
                 <span className="text-[10px] text-slate-500 font-mono">Real-time telemetry</span>
               </div>
 
@@ -438,8 +440,8 @@ export default function ActiveUsersMapPage() {
                         className={cn(
                           "p-3 rounded-xl border transition-all cursor-pointer group flex items-center justify-between",
                           isSelected
-                            ? "bg-cyan-500/5 border-cyan-500/20 text-white"
-                            : "bg-slate-950/20 border-slate-850 hover:bg-slate-950/50 hover:border-slate-800 text-slate-300"
+                            ? "bg-slate-900 border-slate-600 text-white"
+                            : "bg-slate-950/20 border-slate-600 hover:bg-slate-950 hover:border-slate-500 text-slate-300"
                         )}
                       >
                         <div className="min-w-0 flex-1">
@@ -468,69 +470,105 @@ export default function ActiveUsersMapPage() {
                 )}
               </div>
 
-              {/* Selected User Metadata Inspector */}
-              {selectedUser && (
-                <div className="border-t border-slate-850 bg-slate-950/95 p-4 space-y-3.5 max-h-[250px] overflow-y-auto shrink-0 select-text">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Compass className="size-3.5 text-cyan-400" />
-                      Session Inspector
+
+            </div>
+
+          </div>
+
+          {/* Selected User Metadata Inspector */}
+          {selectedUser && (
+            <div className="lg:col-span-12 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 space-y-4 select-text w-full">
+              <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
+                <div className="flex items-center gap-2">
+                  <Compass className="size-4.5 text-cyan-400 animate-pulse" />
+                  <h3 className="text-xs font-bold text-white uppercase tracking-widest">Session Inspector</h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-slate-500 font-mono">Scope: {selectedUser.userId}</span>
+                  <button
+                    onClick={() => copyToClipboard(selectedUser.userId, "userId")}
+                    className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-slate-350 transition-colors"
+                    title="Copy User ID"
+                  >
+                    {copiedId === "userId" ? <Check className="size-3.5 text-emerald-400" /> : <Clipboard className="size-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-xs">
+                {/* User ID */}
+                <div className="p-3 bg-slate-950/40 border border-slate-700 rounded-xl space-y-1">
+                  <span className="text-slate-500 text-[9px] uppercase tracking-wider font-semibold block">User ID</span>
+                  <span className="text-slate-200 font-mono font-bold truncate block" title={selectedUser.userId}>
+                    {selectedUser.userId}
+                  </span>
+                </div>
+
+                {/* IP Address */}
+                <div className="p-3 bg-slate-950/40 border border-slate-700 rounded-xl space-y-1">
+                  <span className="text-slate-500 text-[9px] uppercase tracking-wider font-semibold block">IP Address</span>
+                  <span className="text-slate-200 font-mono font-bold block">
+                    {selectedUser.ip || "N/A"}
+                  </span>
+                </div>
+
+                {/* Geolocation */}
+                <div className="p-3 bg-slate-950/40 border border-slate-700 rounded-xl space-y-1">
+                  <span className="text-slate-500 text-[9px] uppercase tracking-wider font-semibold block">Location</span>
+                  <span className="text-slate-200 font-bold block truncate" title={`${selectedUser.city || ""}, ${selectedUser.country || ""}`}>
+                    {selectedUser.city || "Unknown"}, {selectedUser.country || "Unknown"}
+                  </span>
+                </div>
+
+                {/* Coordinates */}
+                <div className="p-3 bg-slate-950/40 border border-slate-700 rounded-xl space-y-1">
+                  <span className="text-slate-500 text-[9px] uppercase tracking-wider font-semibold block">Coordinates</span>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-slate-200 font-mono font-bold block truncate">
+                      {selectedUser.lat.toFixed(4)}, {selectedUser.lng.toFixed(4)}
                     </span>
                     <button
-                      onClick={() => copyToClipboard(selectedUser.userId, "userId")}
-                      className="p-1 hover:bg-slate-800 rounded text-slate-500 hover:text-slate-350 transition-colors"
-                      title="Copy User ID"
+                      onClick={() => copyToClipboard(`${selectedUser.lat}, ${selectedUser.lng}`, "coords")}
+                      className="text-slate-500 hover:text-slate-350 transition-colors p-0.5 rounded"
+                      title="Copy Coordinates"
                     >
-                      {copiedId === "userId" ? <Check className="size-3 text-emerald-400" /> : <Clipboard className="size-3" />}
+                      {copiedId === "coords" ? <Check className="size-3 text-emerald-400" /> : <Clipboard className="size-3" />}
                     </button>
                   </div>
+                </div>
 
-                  <div className="space-y-2 text-xs">
-                    <div className="grid grid-cols-2 gap-2 text-[11px] font-mono border border-slate-850 p-2.5 rounded-lg bg-slate-900/50">
-                      <div>
-                        <span className="text-slate-500 block text-[9px] uppercase tracking-wider font-semibold">User ID</span>
-                        <span className="text-slate-200 truncate block">{selectedUser.userId}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-500 block text-[9px] uppercase tracking-wider font-semibold">IP Address</span>
-                        <span className="text-slate-200 block">{selectedUser.ip}</span>
-                      </div>
-                      <div className="col-span-2 pt-1 border-t border-slate-850 mt-1 flex items-center justify-between">
-                        <div>
-                          <span className="text-slate-500 block text-[9px] uppercase tracking-wider font-semibold">Coordinates</span>
-                          <span className="text-slate-300 block">{selectedUser.lat.toFixed(4)}, {selectedUser.lng.toFixed(4)}</span>
-                        </div>
-                        <button
-                          onClick={() => copyToClipboard(`${selectedUser.lat}, ${selectedUser.lng}`, "coords")}
-                          className="p-1 hover:bg-slate-800 rounded text-slate-550 hover:text-slate-400 transition-colors self-end"
-                          title="Copy Coordinates"
-                        >
-                          {copiedId === "coords" ? <Check className="size-3 text-emerald-400" /> : <Clipboard className="size-3" />}
-                        </button>
-                      </div>
-                    </div>
+                {/* Current Step */}
+                <div className="p-3 bg-slate-950/40 border border-slate-700 rounded-xl space-y-1">
+                  <span className="text-slate-500 text-[9px] uppercase tracking-wider font-semibold block">Current Step</span>
+                  <div>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 capitalize mt-0.5">
+                      {selectedUser.step || "N/A"}
+                    </span>
+                  </div>
+                </div>
 
-                    {selectedUser.metadata && Object.keys(selectedUser.metadata).length > 0 && (
-                      <div className="space-y-1.5">
-                        <span className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider block">Custom Payload</span>
-                        <div className="p-2.5 bg-slate-900 border border-slate-850 rounded-lg max-h-24 overflow-y-auto text-[10px] font-mono text-slate-400 leading-normal scrollbar-thin">
-                          {Object.entries(selectedUser.metadata).map(([k, v]) => (
-                            <div key={k} className="flex justify-between border-b border-slate-850/40 py-1 last:border-b-0">
-                              <span className="text-cyan-400 shrink-0 mr-2">{k}:</span>
-                              <span className="text-slate-300 truncate max-w-full text-right">
-                                {Array.isArray(v) ? `[${v.join(", ")}]` : typeof v === "object" ? JSON.stringify(v) : String(v)}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                {/* Captured Time */}
+                <div className="p-3 bg-slate-950/40 border border-slate-700 rounded-xl space-y-1">
+                  <span className="text-slate-500 text-[9px] uppercase tracking-wider font-semibold block">Captured</span>
+                  <span className="text-slate-200 font-bold block">
+                    {new Date(selectedUser.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Custom Payload */}
+              {selectedUser.metadata && Object.keys(selectedUser.metadata).length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider block">Custom Payload</span>
+                  <div className="p-4 bg-slate-950/60 border border-slate-700 rounded-xl max-h-40 overflow-y-auto text-xs font-mono text-slate-300 leading-normal scrollbar-thin select-text">
+                    <pre className="text-[11px] text-cyan-400/90 whitespace-pre-wrap">
+                      {JSON.stringify(selectedUser.metadata, null, 2)}
+                    </pre>
                   </div>
                 </div>
               )}
             </div>
-          </div>
-        </div>
+          )}        </div>
       )}
     </div>
   );

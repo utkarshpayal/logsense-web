@@ -194,14 +194,14 @@ export default function ApiKeysPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
           <h2 className="text-base font-extrabold text-white tracking-widest uppercase">API Credentials</h2>
-          <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider">
+          <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider">
             Access keys for scoping logs ingested from your SDKs into{" "}
             <span className="font-semibold text-slate-200">{activeProject?.name}</span>.
           </p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-650 hover:from-cyan-400 hover:to-indigo-600 text-slate-900 text-xs font-bold uppercase tracking-widest transition-all shadow-md cursor-pointer"
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 text-xs font-extrabold uppercase tracking-widest transition-all shadow-md cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Generate Key
@@ -228,10 +228,10 @@ export default function ApiKeysPage() {
           </button>
         </div>
       ) : (
-        <div className="cyber-panel rounded-2xl border border-slate-800 overflow-hidden">
+        <div className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
-              <thead className="border-b border-slate-900 bg-slate-955/40 text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <thead className="border-b border-slate-900 bg-slate-950/40 text-xs font-bold text-slate-500 uppercase tracking-widest">
                 <tr>
                   <th className="px-6 py-4">Name</th>
                   <th className="px-6 py-4">Environment</th>
@@ -267,14 +267,14 @@ export default function ApiKeysPage() {
                             onClick={() => handleStatusToggle(key.id, key.is_active)}
                             disabled={statusMutation.isPending}
                             className={cn(
-                              "relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                              key.is_active ? "bg-cyan-500" : "bg-slate-900 border-slate-800"
+                              "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                              key.is_active ? "bg-cyan-500" : "bg-zinc-800 border-zinc-700"
                             )}
                           >
                             <span
                               className={cn(
-                                "pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-slate-955 shadow ring-0 transition duration-200 ease-in-out mt-[2px]",
-                                key.is_active ? "translate-x-3.5" : "translate-x-0.5"
+                                "pointer-events-none inline-block h-4 w-4 transform rounded-full shadow ring-0 transition duration-200 ease-in-out mt-[2px]",
+                                key.is_active ? "translate-x-4 bg-zinc-950" : "translate-x-0.5 bg-zinc-400"
                               )}
                             />
                           </button>
@@ -363,7 +363,7 @@ export default function ApiKeysPage() {
                 <input
                   type="text"
                   placeholder="e.g. Production Ingestion"
-                  className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-800 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+                  className="block w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
                   {...register("name")}
                   disabled={createMutation.isPending}
                 />
@@ -397,19 +397,19 @@ export default function ApiKeysPage() {
                     reset();
                     setModalOpen(false);
                   }}
-                  className="px-4 py-2.5 rounded-xl border border-slate-850 hover:bg-slate-950 text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl border border-slate-800 hover:bg-slate-950 text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer"
                   disabled={createMutation.isPending}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/30 text-cyan-455 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 text-xs font-extrabold uppercase tracking-widest transition-all shadow-[0_0_15px_-4px_rgba(6,182,212,0.25)] cursor-pointer"
                   disabled={createMutation.isPending}
                 >
                   {createMutation.isPending ? (
                     <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-950" />
                       <span>Generating...</span>
                     </>
                   ) : (
@@ -446,16 +446,16 @@ export default function ApiKeysPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   Key Name
                 </label>
-                <div className="text-slate-200 text-xs font-bold bg-slate-955 px-3.5 py-2.5 border border-slate-900 rounded-xl">
+                <div className="text-slate-200 text-xs font-bold bg-slate-950 px-3.5 py-2.5 border border-slate-900 rounded-xl">
                   {generatedKeyData.name}
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   Key Token
                 </label>
                 <div className="flex gap-2">
@@ -478,7 +478,7 @@ export default function ApiKeysPage() {
               <div className="flex justify-end pt-4 border-t border-slate-900 mt-2">
                 <button
                   onClick={() => setGeneratedKeyData(null)}
-                  className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 text-xs font-extrabold uppercase tracking-widest transition-all shadow-[0_0_15px_-4px_rgba(6,182,212,0.25)] cursor-pointer"
                 >
                   I've Copied the Secret Key
                 </button>
