@@ -11,7 +11,7 @@ LogSense is an AI-powered developer observability platform that turns raw logs a
 The LogSense platform is composed of three primary components working together:
 
 1. **LogSense SDK (`logsense-sdk-node`)**: Middleware integrated into client applications (e.g. Express) to automatically collect requests, responses, performance metrics, and error stack traces. It redacts sensitive data locally and flushes logs asynchronously in batches.
-2. **LogSense Server (`logsense-server`)**: Fastify-based backend server. It hosts the ingestion API to receive log batches, validates API keys, handles project-level authentication, and features an AI Query Engine using Gemini/Groq to parse natural language questions into safe Postgres SQL queries.
+2. **LogSense Server (`logsense-server`)**: Fastify-based backend server. It hosts the ingestion API to receive log batches, validates API keys, handles project-level authentication, and runs an AI log agent (via a local Ollama server) that answers natural-language questions using log/metric/trace tools, with a validated read-only SQL fallback.
 3. **LogSense Web (`logsense-web`)**: Next.js (App Router) observability dashboard. It communicates with the backend via REST endpoints to display system health metrics, manage credentials, explore logs, and host the AI Query interface.
 
 ### Request and Ingestion Flow
@@ -30,21 +30,21 @@ sequenceDiagram
     Client->>SDK: Intercept HTTP Request / Exception
     SDK->>SDK: Generate trace_id & redact PII
     SDK->>SDK: Buffer log asynchronously
-    SDK->>Server: POST /api/logs (Batch ingestion)
+    SDK->>Server: POST /logs (batch ingestion, x-api-key)
     Server->>DB: Validate API Key & persist logs
     
     Note over Developer, Web: Dashboard Interface
     Developer->>Web: Open Dashboard & select Project
-    Web->>Server: GET /api/logs?projectId=...
+    Web->>Server: GET /logs?projectId=...
     Server->>DB: Fetch project logs
     DB-->>Web: Render Log Explorer feed
 
     Note over Developer, Web: Natural Language AI Observability
     Developer->>Web: Ask: "Which service had the most errors?"
-    Web->>Server: POST /api/ai/chat {"prompt": "...", "projectId": "..."}
-    Server->>Server: LLM (Gemini/Groq) parses prompt to SQL
-    Server->>Server: Validate query structure (SELECT only) & inject project_id scope
-    Server->>DB: Execute secure SQL query
+    Web->>Server: POST /projects/:projectId/ai/chat {"prompt": "..."}
+    Server->>Server: LLM plans the question and selects tools (or generates SQL as a fallback)
+    Server->>Server: Validate fallback SQL (SELECT only) & inject project_id scope
+    Server->>DB: Execute tool queries / validated SQL
     DB-->>Server: Return raw tabular results
     Server->>Server: LLM translates query result to Natural Language
     Server-->>Web: Return answer message + generated SQL + raw table data
@@ -73,7 +73,20 @@ sequenceDiagram
 - **Explainable SQL**: The generated read-only SQL query is printed inline alongside database results for full transparency.
 - **Raw Data Grid**: A dynamically rendered tabular results view displays raw columns directly returned from the database query.
 
-### 4. API Key & Environment Scoping
+### 4. Log Explorer Extras
+- **Trace Waterfall** (`components/TraceWaterfall.tsx`): timeline view of the spans/logs sharing a trace ID, coloured per service.
+- **Log Minimap** (`components/LogMinimap.tsx`): compact overview of the log feed for quick navigation.
+- **Pattern Intelligence** (`components/LogPatternIntelligence.tsx`): groups similar log messages into patterns.
+- **AI Log Analyzer** (`components/AiLogAnalyzer.tsx`): explains a single log event (and suggests fixes for errors) by sending it to the AI chat endpoint; the answer is rendered as Markdown.
+
+### 5. Active Users Map
+- The **Active Users** page plots user/onboarding activity from `GET /dashboard/onboarding` on a Leaflet map, with filtering, search and polling.
+
+### 6. Projects & Settings
+- **Project detail** page with SDK integration snippets that use the configured API URL.
+- **Settings** page with profile and password management, Discord webhook alert integration, and log retention days.
+
+### 7. API Key & Environment Scoping
 - **Scoped Credentials**: Generate API keys specifically bound to environments (`development`, `staging`, `production`).
 - **Access Controls**: Toggle API key active states instantly to enable or disable ingestion endpoints.
 - **Security Protections**: Sensitive keys are displayed in plain-text only once upon generation and are masked permanently afterward.
@@ -90,9 +103,12 @@ sequenceDiagram
 | **TanStack React Query v5** | Server State Management | Cache invalidation, automated polling, request deduplication |
 | **Zustand** | Client State Management | Fast, lightweight global stores for Authentication and Project state |
 | **Tailwind CSS v4** | Component Styling | Sleek dark-mode theme, custom blur glows, transitions |
-| **Axios** | HTTP client | Interceptors for attaching JWT auth headers, default baseURL |
+| **Axios** | HTTP client | Interceptors for attaching JWT auth headers, token refresh on 401, default baseURL |
 | **Lucide React** | Icon Suite | Modern SVG micro-icons for dashboard navigation |
 | **React Hook Form + Zod** | Form handling & Validation | Strong validation for API keys and Project forms |
+| **Leaflet** | Maps | Active Users map |
+| **react-markdown + remark-gfm** | Markdown rendering | AI answers |
+| **Sonner** | Toasts | Notifications |
 
 ---
 
@@ -104,9 +120,9 @@ sequenceDiagram
 
 ### 🔧 Installation & Setup
 
-1. **Clone the repository** and navigate to the web directory:
+1. **Clone the repository** and enter it:
    ```bash
-   cd logsense-dashboard/logsense-web
+   cd logsense-web
    ```
 
 2. **Install project dependencies**:
@@ -117,9 +133,9 @@ sequenceDiagram
 3. **Configure Environment Variables**:
    Create a `.env.local` file in the root of the project:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:5000
+   NEXT_PUBLIC_API_URL=<url of your logsense-server, e.g. http://localhost:5000>
    ```
-   *Note: Set `NEXT_PUBLIC_API_URL` to point to your running `logsense-server` instance.*
+   *`NEXT_PUBLIC_API_URL` is the only environment variable used; it is the Axios base URL for all API calls and is also shown in the SDK setup snippets.*
 
 4. **Start the local development server**:
    ```bash
@@ -136,4 +152,34 @@ npm run build
 
 # Start the compiled client server
 npm run start
+```
+
+### Other scripts
+
+```bash
+npm run lint   # eslint
+```
+
+No test script is defined.
+
+> This project uses Next.js 16, which has breaking changes from earlier versions. Contributors (and coding agents — see `AGENTS.md`) should consult the docs bundled in `node_modules/next/dist/docs/` rather than older Next.js conventions.
+
+---
+
+## 📁 Project Structure
+
+```
+app/
+  (auth)/login/            Login / register
+  (dashboard)/dashboard/   Metrics overview
+  (dashboard)/logs/        Log Explorer
+  (dashboard)/projects/    Project list and detail ([id])
+  (dashboard)/api-keys/    API key management
+  (dashboard)/active-users/ Active Users map
+  (dashboard)/settings/    Profile, alerts, retention
+components/                Log explorer widgets, AI analyzer, layout (sidebar, navbar, chatbot drawer), Leaflet map
+hooks/use-auth.ts          Auth hook
+lib/                       Axios instance (auth + refresh interceptors), typed API client, React Query client
+store/                     Zustand stores (auth, selected project)
+types/                     Shared API types
 ```
